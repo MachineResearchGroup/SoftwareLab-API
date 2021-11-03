@@ -1,0 +1,15 @@
+version: "3.7"
+
+services:
+  database:
+    image: postgres:9.6
+    container_name: "postgres-ws"
+    environment:
+      - POSTGRES_DB=ws
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+      - TZ=UTC
+    volumes:
+      - "/var/lib/postgresql/data"
+    ports:
+      - 5432:5432
