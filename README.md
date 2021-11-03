@@ -5,10 +5,9 @@
 | Tecnologia | Versão |
 | ------ | ------ |
 | Java | 11 |
-| Spring Boot | 2.5.4 |
-| Maven |  |
+| Spring Boot | 2.5.3 |
 | PostgreSQL | 13 |
-| Poiji | 3.1.1 |
+|Docker | |
 
 ## Instalação
 
