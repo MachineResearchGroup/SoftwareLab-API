@@ -4,17 +4,16 @@
 
 | Tecnologia | Versão |
 | ------ | ------ |
-| Java | 11 |
-| Spring Boot | 2.5.4 |
-| Maven |  |
+| Java | 16 |
+| Spring Boot | 2.5.3 |
 | PostgreSQL | 13 |
-| Poiji | 3.1.1 |
+|Docker | |
 
 ## Instalação
 
 ```sh
 # Clonar o repositório do project
-$ git clone https://gitlab.com/softwarelab1/api-softwarelab.git
+$ git clone https://github.com/MachineResearchGroup/SoftwareLab-API.git
 
 # Instalar as dependências
 $ maven install
