@@ -13,7 +13,7 @@
 
 ```sh
 # Clonar o repositório do project
-$ git clone https://gitlab.com/softwarelab1/api-softwarelab.git
+$ git clone https://github.com/MachineResearchGroup/SoftwareLab-API.git
 
 # Instalar as dependências
 $ maven install
