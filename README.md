@@ -4,8 +4,8 @@
 
 | Tecnologia | Versão |
 | ------ | ------ |
-| Java | 11 |
-| Spring Boot | 2.5.3 |
+| Java | 16 |
+| Spring Boot | 2.5.6 |
 | PostgreSQL | 13 |
 |Docker | |
 
