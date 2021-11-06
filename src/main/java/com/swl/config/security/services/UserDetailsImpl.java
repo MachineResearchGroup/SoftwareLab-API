@@ -1,9 +1,9 @@
 package com.swl.config.security.services;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.swl.models.Client;
-import com.swl.models.Collaborator;
-import com.swl.models.User;
+import com.swl.models.user.Client;
+import com.swl.models.user.Collaborator;
+import com.swl.models.user.User;
 import com.swl.models.enums.FunctionEnum;
 import lombok.Builder;
 import org.springframework.security.core.GrantedAuthority;

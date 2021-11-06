@@ -1,6 +1,6 @@
 package com.swl.repository;
 
-import com.swl.models.Project;
+import com.swl.models.project.Project;
 import com.swl.util.BuilderUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

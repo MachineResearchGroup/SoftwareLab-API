@@ -1,9 +1,9 @@
 package com.swl.service;
 
-import com.swl.models.*;
-import com.swl.models.enums.MessageEnum;
+import com.swl.models.management.Team;
+import com.swl.models.project.Project;
+import com.swl.models.user.Client;
 import com.swl.payload.request.ProjectRequest;
-import com.swl.payload.response.MessageResponse;
 import com.swl.repository.*;
 import com.swl.util.BuilderUtil;
 import org.junit.jupiter.api.Assertions;

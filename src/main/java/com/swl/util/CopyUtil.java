@@ -1,6 +1,6 @@
 package com.swl.util;
 
-import com.swl.models.Organization;
+import com.swl.models.management.Organization;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 

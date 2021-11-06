@@ -1,4 +1,4 @@
-package com.swl.models;
+package com.swl.models.management;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;

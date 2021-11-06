@@ -1,6 +1,10 @@
 package com.swl.repository;
 
-import com.swl.models.*;
+import com.swl.models.management.Organization;
+import com.swl.models.management.OrganizationTeam;
+import com.swl.models.management.Team;
+import com.swl.models.user.Collaborator;
+import com.swl.models.user.User;
 import com.swl.util.BuilderUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

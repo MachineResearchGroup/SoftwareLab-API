@@ -1,36 +1,39 @@
-package com.swl.models;
+package com.swl.models.project;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.swl.models.user.Client;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.time.LocalDate;
 import java.util.List;
+
 
 @Data
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "clients")
-@EqualsAndHashCode(exclude="clients")
-public class Project {
+@ToString(exclude = "projects")
+@EqualsAndHashCode(exclude = "projects")
+public class Requirement {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NonNull
-    @Size(max = 50)
-    private String name;
-
-    @Size(max = 500)
+    @Size(max = 2000)
     private String description;
 
-    private String repository;
+    private String category;
 
+    private String subcategory;
+
+    @NotNull
     @JsonIgnore
     @ManyToMany
-    private List<Client> clients;
+    private List<Project> projects;
 
 }

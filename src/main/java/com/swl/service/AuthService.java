@@ -2,9 +2,9 @@ package com.swl.service;
 
 import com.swl.config.security.jwt.JwtUtils;
 import com.swl.config.security.services.UserDetailsImpl;
-import com.swl.models.Client;
-import com.swl.models.Collaborator;
-import com.swl.models.User;
+import com.swl.models.user.Client;
+import com.swl.models.user.Collaborator;
+import com.swl.models.user.User;
 import com.swl.models.enums.FunctionEnum;
 import com.swl.models.enums.MessageEnum;
 import com.swl.payload.request.ClientRequest;

@@ -1,6 +1,8 @@
-package com.swl.models;
+package com.swl.models.management;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.swl.models.user.Collaborator;
+import com.swl.models.project.Project;
 import lombok.*;
 
 import javax.persistence.*;

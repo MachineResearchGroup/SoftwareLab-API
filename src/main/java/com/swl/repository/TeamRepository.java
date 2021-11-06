@@ -1,6 +1,6 @@
 package com.swl.repository;
 
-import com.swl.models.Team;
+import com.swl.models.management.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

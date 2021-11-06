@@ -1,9 +1,9 @@
 package com.swl.service;
 
-import com.swl.models.Collaborator;
-import com.swl.models.Address;
-import com.swl.models.Organization;
-import com.swl.models.OrganizationTeam;
+import com.swl.models.user.Collaborator;
+import com.swl.models.management.Address;
+import com.swl.models.management.Organization;
+import com.swl.models.management.OrganizationTeam;
 import com.swl.models.enums.MessageEnum;
 import com.swl.util.ModelUtil;
 import com.swl.payload.request.OrganizationRequest;

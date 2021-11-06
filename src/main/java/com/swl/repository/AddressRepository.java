@@ -1,6 +1,6 @@
 package com.swl.repository;
 
-import com.swl.models.Address;
+import com.swl.models.management.Address;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

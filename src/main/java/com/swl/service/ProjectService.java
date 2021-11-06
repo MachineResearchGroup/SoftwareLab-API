@@ -1,15 +1,12 @@
 package com.swl.service;
 
-import com.swl.models.Client;
-import com.swl.models.Organization;
-import com.swl.models.Project;
-import com.swl.models.Team;
+import com.swl.models.user.Client;
+import com.swl.models.project.Project;
+import com.swl.models.management.Team;
 import com.swl.models.enums.MessageEnum;
-import com.swl.payload.request.OrganizationRequest;
 import com.swl.payload.request.ProjectRequest;
 import com.swl.payload.response.MessageResponse;
 import com.swl.repository.ClientRepository;
-import com.swl.repository.OrganizacaoRepository;
 import com.swl.repository.ProjectRepository;
 import com.swl.repository.TeamRepository;
 import com.swl.util.ModelUtil;
@@ -23,7 +20,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 
 @Service

@@ -1,11 +1,10 @@
 package com.swl.service;
 
-import com.swl.models.Collaborator;
-import com.swl.models.Team;
-import com.swl.models.Organization;
-import com.swl.models.OrganizationTeam;
+import com.swl.models.user.Collaborator;
+import com.swl.models.management.Team;
+import com.swl.models.management.Organization;
+import com.swl.models.management.OrganizationTeam;
 import com.swl.models.enums.MessageEnum;
-import com.swl.payload.request.OrganizationRequest;
 import com.swl.payload.request.TeamRequest;
 import com.swl.payload.response.MessageResponse;
 import com.swl.repository.CollaboratorRepository;

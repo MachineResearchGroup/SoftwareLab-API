@@ -1,5 +1,6 @@
-package com.swl.models;
+package com.swl.models.management;
 
+import com.swl.models.user.Collaborator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

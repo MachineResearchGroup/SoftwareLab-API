@@ -1,7 +1,7 @@
 package com.swl.repository;
 
-import com.swl.models.Address;
-import com.swl.models.Organization;
+import com.swl.models.management.Address;
+import com.swl.models.management.Organization;
 import com.swl.util.BuilderUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

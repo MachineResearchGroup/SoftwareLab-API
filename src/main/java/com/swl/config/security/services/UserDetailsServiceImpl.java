@@ -1,8 +1,8 @@
 package com.swl.config.security.services;
 
-import com.swl.models.Client;
-import com.swl.models.Collaborator;
-import com.swl.models.User;
+import com.swl.models.user.Client;
+import com.swl.models.user.Collaborator;
+import com.swl.models.user.User;
 import com.swl.repository.ClientRepository;
 import com.swl.repository.CollaboratorRepository;
 import com.swl.repository.UserRepository;

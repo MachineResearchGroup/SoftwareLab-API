@@ -1,10 +1,10 @@
 package com.swl.controllers;
 
 import com.swl.config.swagger.ApiRoleAccessNotes;
-import com.swl.models.Client;
-import com.swl.models.Organization;
-import com.swl.models.Project;
-import com.swl.models.Team;
+import com.swl.models.user.Client;
+import com.swl.models.management.Organization;
+import com.swl.models.project.Project;
+import com.swl.models.management.Team;
 import com.swl.models.enums.MessageEnum;
 import com.swl.payload.request.ProjectRequest;
 import com.swl.payload.response.MessageResponse;
@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
