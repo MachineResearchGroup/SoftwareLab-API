@@ -5,6 +5,7 @@ import com.swl.models.Address;
 import com.swl.models.Organization;
 import com.swl.models.OrganizationTeam;
 import com.swl.models.enums.MessageEnum;
+import com.swl.util.ModelUtil;
 import com.swl.payload.request.OrganizationRequest;
 import com.swl.payload.response.MessageResponse;
 import com.swl.repository.CollaboratorRepository;
@@ -38,21 +39,42 @@ public class OrganizationService {
     private final UserService userService;
 
 
-    public ResponseEntity<?> registerOrganization(OrganizationRequest registerRequest) {
+    public ResponseEntity<?> verifyOrganization(OrganizationRequest registerRequest){
+        ModelUtil modelUtil = ModelUtil.getInstance();
+        Organization organization = new Organization();
+
+        modelUtil.map(registerRequest, organization);
+        List<MessageResponse> messageResponses = modelUtil.validate(organization);
+
+        if(repository.findOrganizationByCnpj(registerRequest.getCnpj()).isPresent()){
+            messageResponses.add(new MessageResponse(MessageEnum.ALREADY_EXISTS, "cnpj"));
+        }
+
+        if (!messageResponses.isEmpty()) {
+            return ResponseEntity.badRequest().body(messageResponses);
+        }
+
+        return ResponseEntity.ok(new MessageResponse(MessageEnum.VALID, Organization.class));
+    }
+
+
+    public Organization registerOrganization(OrganizationRequest registerRequest) {
+        ModelUtil modelUtil = ModelUtil.getInstance();
         Organization organization = new Organization();
         OrganizationTeam organizationTeam = new OrganizationTeam();
+
+        modelUtil.map(registerRequest, organization);
 
         if (userService.getCurrentUser().isPresent() && userService.getCurrentUser().get() instanceof Collaborator) {
             organization.setSupervisor((Collaborator) userService.getCurrentUser().get());
             organizationTeam.setCollaborator((Collaborator) userService.getCurrentUser().get());
         }
-
-        CopyUtil.copyProperties(registerRequest, organization);
+        organization.setAddress(null);
         organization = repository.save(organization);
 
         if (!Objects.isNull(registerRequest.getAddress())) {
             Address address = new Address();
-            CopyUtil.copyProperties(registerRequest.getAddress(), address);
+            modelUtil.map(registerRequest.getAddress(), address);
 
             address.setOrganization(organization);
             organization.setAddress(address);
@@ -64,17 +86,20 @@ public class OrganizationService {
 
         organizationTeamRepository.save(organizationTeam);
 
-        return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, organization));
+        return organization;
 
     }
 
 
     public Organization editOrganization(Integer idOrg, OrganizationRequest registerRequest) {
+        ModelUtil modelUtil = ModelUtil.getInstance();
+
         Optional<Organization> org = repository.findById(idOrg);
 
         if (org.isPresent()) {
             Organization orgEdit = org.get();
-            CopyUtil.copyProperties(registerRequest, orgEdit);
+            modelUtil.map(registerRequest, orgEdit);
+
             orgEdit = repository.save(orgEdit);
 
             if (!Objects.isNull(registerRequest.getAddress())) {

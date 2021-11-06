@@ -7,7 +7,7 @@ import java.util.Collections;
 
 public class BuilderUtil {
 
-    public static User buildUsuario() {
+    public static User buildUser() {
         return User.builder()
                 .name("User 1")
                 .username("Username")
@@ -16,25 +16,25 @@ public class BuilderUtil {
                 .build();
     }
 
-    public static Client buildCliente() {
+    public static Client buildClient() {
         return Client.builder()
                 .corporateName("Cliente Teste")
                 .segments(new ArrayList<>(Collections.singletonList("Industria")))
-                .user(buildUsuario())
+                .user(buildUser())
                 .build();
     }
 
 
-    public static Collaborator buildColaborador() {
+    public static Collaborator buildCollaborator() {
         return Collaborator.builder()
                 .register("12345")
                 .function("ROLE_PMO")
-                .user(buildUsuario())
+                .user(buildUser())
                 .build();
     }
 
 
-    public static Organization buildOrganizacao() {
+    public static Organization buildOrganization() {
         return Organization.builder()
                 .cnpj("12345678912345")
                 .name("Empresa A")
@@ -42,14 +42,23 @@ public class BuilderUtil {
     }
 
 
-    public static Team buildEquipe() {
+    public static Organization buildOrganizationWithAddress() {
+        return Organization.builder()
+                .cnpj("12345678912345")
+                .name("Empresa A")
+                .address(buildAddress())
+                .build();
+    }
+
+
+    public static Team buildTeam() {
         return Team.builder()
                 .name("Equipe Teste")
                 .build();
     }
 
 
-    public static Address buildEndereco() {
+    public static Address buildAddress() {
         return Address.builder()
                 .street("Rua teste")
                 .number("123")
@@ -59,7 +68,7 @@ public class BuilderUtil {
     }
 
 
-    public static Project buildProjeto() {
+    public static Project buildProject() {
         return Project.builder()
                 .name("Projeto teste")
                 .description("...")

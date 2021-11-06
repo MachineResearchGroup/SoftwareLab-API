@@ -5,11 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.br.CNPJ;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.List;
+import javax.validation.constraints.*;
 
 
 @Data
@@ -30,7 +29,9 @@ public class Organization {
     @Size(max = 50)
     private String name;
 
-    @Size(max = 14)
+    @NotNull
+    @Size(max = 18)
+    @CNPJ(message = "Invalid cpnj format")
     private String cnpj;
 
     @OneToOne(mappedBy = "organization", cascade = CascadeType.ALL)
@@ -40,12 +41,5 @@ public class Organization {
     @JsonIgnore
     @OneToOne
     private Collaborator supervisor;
-
-    @JsonIgnore
-    @ManyToMany
-    @JoinTable(name = "cliente_organizacao",
-            joinColumns = @JoinColumn(name = "organizacao_id"),
-            inverseJoinColumns = @JoinColumn(name = "cliente_id"))
-    private List<Client> client;
 
 }

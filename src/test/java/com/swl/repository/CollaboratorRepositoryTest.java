@@ -32,7 +32,7 @@ public class CollaboratorRepositoryTest {
 
     @Test
     public void createCollaborator() {
-        Collaborator col = BuilderUtil.buildColaborador();
+        Collaborator col = BuilderUtil.buildCollaborator();
         col.setUser(userRepository.save(col.getUser()));
 
         repository.save(col);
@@ -44,7 +44,7 @@ public class CollaboratorRepositoryTest {
 
     @Test
     public void deleteCollaborator() {
-        Collaborator col = BuilderUtil.buildColaborador();
+        Collaborator col = BuilderUtil.buildCollaborator();
         col.setUser(userRepository.save(col.getUser()));
 
         col = repository.save(col);
@@ -58,7 +58,7 @@ public class CollaboratorRepositoryTest {
 
     @Test
     public void searchCollaborator() {
-        Collaborator col = BuilderUtil.buildColaborador();
+        Collaborator col = BuilderUtil.buildCollaborator();
         col.setUser(userRepository.save(col.getUser()));
 
         col = repository.save(col);
@@ -70,13 +70,13 @@ public class CollaboratorRepositoryTest {
 
     @Test
     public void updateCollaborator() {
-        Collaborator col = BuilderUtil.buildColaborador();
+        Collaborator col = BuilderUtil.buildCollaborator();
         User user = userRepository.save(col.getUser());
         col.setUser(user);
 
         col = repository.save(col);
 
-        Collaborator colUpdate = BuilderUtil.buildColaborador();
+        Collaborator colUpdate = BuilderUtil.buildCollaborator();
         colUpdate.setId(col.getId());
         colUpdate.setUser(user);
         colUpdate.setFunction("ROLE_PO");
@@ -89,7 +89,7 @@ public class CollaboratorRepositoryTest {
 
     @Test
     public void findCollaboratorByUserId() {
-        Collaborator col = BuilderUtil.buildColaborador();
+        Collaborator col = BuilderUtil.buildCollaborator();
         col.setUser(userRepository.save(col.getUser()));
 
         repository.save(col);
@@ -101,7 +101,7 @@ public class CollaboratorRepositoryTest {
 
     @Test
     public void findCollaboratorByUserEmail() {
-        Collaborator col = BuilderUtil.buildColaborador();
+        Collaborator col = BuilderUtil.buildCollaborator();
         col.setUser(userRepository.save(col.getUser()));
 
         repository.save(col);
@@ -113,10 +113,10 @@ public class CollaboratorRepositoryTest {
 
     @Test
     public void findAllCollaboratorByOrganizationId() {
-        Organization organization = BuilderUtil.buildOrganizacao();
+        Organization organization = BuilderUtil.buildOrganization();
         organization = organizacaoRepository.save(organization);
 
-        Collaborator col = BuilderUtil.buildColaborador();
+        Collaborator col = BuilderUtil.buildCollaborator();
         col.setUser(userRepository.save(col.getUser()));
         col = repository.save(col);
 
@@ -133,13 +133,13 @@ public class CollaboratorRepositoryTest {
 
     @Test
     public void findAllCollaboratorByTeamId() {
-        Organization organization = BuilderUtil.buildOrganizacao();
+        Organization organization = BuilderUtil.buildOrganization();
         organization = organizacaoRepository.save(organization);
 
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
         team = teamRepository.save(team);
 
-        Collaborator col = BuilderUtil.buildColaborador();
+        Collaborator col = BuilderUtil.buildCollaborator();
         col.setUser(userRepository.save(col.getUser()));
         col = repository.save(col);
 

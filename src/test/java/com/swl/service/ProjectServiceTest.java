@@ -47,7 +47,7 @@ public class ProjectServiceTest {
 
     @Test
     public void registerProject_Sucessfully() {
-        Project project = BuilderUtil.buildProjeto();
+        Project project = BuilderUtil.buildProject();
 
         ProjectRequest projetoRequest = ProjectRequest.builder()
                 .name(project.getName())
@@ -60,13 +60,20 @@ public class ProjectServiceTest {
         Mockito.when(repository.save(project)).thenReturn(project);
 
         var response = service.registerProject(projetoRequest);
-        Assertions.assertEquals(Objects.requireNonNull(response.getBody()), new MessageResponse(MessageEnum.REGISTERED, project));
+        Assertions.assertEquals(response, project);
+
+        Team team = BuilderUtil.buildTeam();
+
+        Mockito.when(teamRepository.findById(1)).thenReturn(Optional.of(team));
+
+        response = service.registerProject(projetoRequest);
+        Assertions.assertEquals(response, project);
     }
 
 
     @Test
     public void registerProject_ErrorTeam() {
-        Project project = BuilderUtil.buildProjeto();
+        Project project = BuilderUtil.buildProject();
 
         ProjectRequest projetoRequest = ProjectRequest.builder()
                 .name(project.getName())
@@ -78,13 +85,13 @@ public class ProjectServiceTest {
         Mockito.when(teamRepository.findById(1)).thenReturn(Optional.empty());
 
         var response = service.registerProject(projetoRequest);
-        Assertions.assertEquals(Objects.requireNonNull(response.getBody()), new MessageResponse(MessageEnum.NOT_FOUND, Team.class));
+        Assertions.assertNull(response);
     }
 
 
     @Test
     public void editProject_Sucessfully() {
-        Project project = BuilderUtil.buildProjeto();
+        Project project = BuilderUtil.buildProject();
 
         ProjectRequest projetoRequest = ProjectRequest.builder()
                 .name(project.getName())
@@ -103,7 +110,7 @@ public class ProjectServiceTest {
 
     @Test
     public void editProject_Error() {
-        Project project = BuilderUtil.buildProjeto();
+        Project project = BuilderUtil.buildProject();
 
         ProjectRequest projetoRequest = ProjectRequest.builder()
                 .name(project.getName())
@@ -153,5 +160,75 @@ public class ProjectServiceTest {
 
         var response = service.deleteProject(1);
         Assertions.assertFalse(response);
+    }
+
+
+    @Test
+    public void addClientInProject_Sucessfully() {
+        Project project = BuilderUtil.buildProject();
+        project.setClients(null);
+
+        Mockito.when(repository.findById(1)).thenReturn(Optional.of(project));
+        Mockito.when(clientRepository.findClientByUserEmail("client@gmail.com"))
+                .thenReturn(Optional.of(Mockito.mock(Client.class)));
+
+        var response = service.addClientInProject(1, "client@gmail.com");
+        Assertions.assertTrue(response);
+
+        project = BuilderUtil.buildProject();
+        Client client = Mockito.mock(Client.class);
+        project.setClients(new ArrayList<>(Collections.singletonList(client)));
+
+        Mockito.when(repository.findById(1)).thenReturn(Optional.of(project));
+        Mockito.when(clientRepository.findClientByUserEmail("client@gmail.com"))
+                .thenReturn(Optional.of(client));
+
+        response = service.addClientInProject(1, "client@gmail.com");
+        Assertions.assertTrue(response);
+    }
+
+
+    @Test
+    public void addClientInProject_Error() {
+        Mockito.when(repository.findById(1)).thenReturn(Optional.empty());
+        Mockito.when(clientRepository.findClientByUserEmail("client@gmail.com"))
+                .thenReturn(Optional.of(Mockito.mock(Client.class)));
+
+        var response = service.addClientInProject(1, "client@gmail.com");
+        Assertions.assertFalse(response);
+    }
+
+
+    @Test
+    public void getAllProjectsByTeam_Sucessfully() {
+        Team team = BuilderUtil.buildTeam();
+        team.setProjects(new ArrayList<>(Collections.singletonList(Mockito.mock(Project.class))));
+
+        Mockito.when(teamRepository.findById(1)).thenReturn(Optional.of(team));
+
+        var response = service.getAllProjectsByTeam(1);
+        Assertions.assertEquals(response.get(0), team.getProjects().get(0));
+    }
+
+
+    @Test
+    public void getAllProjectsByOrganization_Sucessfully() {
+        Team team = BuilderUtil.buildTeam();
+        team.setProjects(new ArrayList<>(Collections.singletonList(Mockito.mock(Project.class))));
+        List<Team> teamList = new ArrayList<>(Collections.singletonList(team));
+
+        Mockito.when(teamService.getAllTeamByOrganization(1)).thenReturn(teamList);
+
+        var response = service.getAllProjectsByOrganization(1);
+        Assertions.assertEquals(response.get(0), team.getProjects().get(0));
+    }
+
+
+    @Test
+    public void getAllProjectsByOrganization_Error() {
+        Mockito.when(teamService.getAllTeamByOrganization(1)).thenReturn(null);
+
+        var response = service.getAllProjectsByOrganization(1);
+        Assertions.assertNull(response);
     }
 }

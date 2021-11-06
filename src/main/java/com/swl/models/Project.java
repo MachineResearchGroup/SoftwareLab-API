@@ -24,6 +24,7 @@ public class Project {
     @Size(max = 50)
     private String name;
 
+    @Size(max = 500)
     private String description;
 
     private String repository;

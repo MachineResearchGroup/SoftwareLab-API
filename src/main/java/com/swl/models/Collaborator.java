@@ -25,7 +25,6 @@ public class Collaborator {
     @OneToOne
     private User user;
 
-    @NotNull
     private String register;
 
     @NotNull

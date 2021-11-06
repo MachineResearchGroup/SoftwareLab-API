@@ -5,12 +5,14 @@ import com.swl.models.Organization;
 import com.swl.models.Project;
 import com.swl.models.Team;
 import com.swl.models.enums.MessageEnum;
+import com.swl.payload.request.OrganizationRequest;
 import com.swl.payload.request.ProjectRequest;
 import com.swl.payload.response.MessageResponse;
 import com.swl.repository.ClientRepository;
 import com.swl.repository.OrganizacaoRepository;
 import com.swl.repository.ProjectRepository;
 import com.swl.repository.TeamRepository;
+import com.swl.util.ModelUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +43,22 @@ public class ProjectService {
     private final TeamService teamService;
 
 
-    public ResponseEntity<?> registerProject(ProjectRequest projectRequest) {
+    public ResponseEntity<?> verifyProject(ProjectRequest projectRequest){
+        ModelUtil modelUtil = ModelUtil.getInstance();
+        Project project = new Project();
+
+        modelUtil.map(projectRequest, project);
+        List<MessageResponse> messageResponses = modelUtil.validate(project);
+
+        if (!messageResponses.isEmpty()) {
+            return ResponseEntity.badRequest().body(messageResponses);
+        }
+
+        return ResponseEntity.ok(new MessageResponse(MessageEnum.VALID, Project.class));
+    }
+
+
+    public Project registerProject(ProjectRequest projectRequest) {
 
         Optional<Team> teamOptional = teamRepository.findById(projectRequest.getIdTeam());
         if (teamOptional.isPresent()) {
@@ -58,12 +75,9 @@ public class ProjectService {
             project = repository.save(project);
             teamRepository.save(teamOptional.get());
 
-            return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, project));
-
+            return project;
         } else {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.NOT_FOUND, Team.class));
+            return null;
         }
     }
 
@@ -134,7 +148,7 @@ public class ProjectService {
 
     public List<Project> getAllProjectsByOrganization(Integer idOrganization){
         List<Team> teams = teamService.getAllTeamByOrganization(idOrganization);
-        if(!teams.isEmpty()) {
+        if(!Objects.isNull(teams) && !teams.isEmpty()) {
             List<Project> projects = new ArrayList<>();
             teams.stream().filter(t -> !t.getProjects().isEmpty()).forEach(t -> projects.addAll(t.getProjects()));
 

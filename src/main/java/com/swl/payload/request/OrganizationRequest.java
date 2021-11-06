@@ -2,8 +2,8 @@ package com.swl.payload.request;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.NonNull;
 
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 
@@ -11,7 +11,7 @@ import javax.validation.constraints.Size;
 @Builder
 public class OrganizationRequest {
 
-    @NonNull
+    @NotNull
     private String name;
 
     @Size(max = 14)

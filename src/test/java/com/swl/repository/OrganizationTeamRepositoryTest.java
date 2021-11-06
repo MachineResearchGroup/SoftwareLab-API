@@ -35,7 +35,7 @@ public class OrganizationTeamRepositoryTest {
 
     @Test
     public void createOrganizationTeam() {
-        Organization organization = BuilderUtil.buildOrganizacao();
+        Organization organization = BuilderUtil.buildOrganization();
         organization = organizacaoRepository.save(organization);
 
         OrganizationTeam organizationTeam = OrganizationTeam.builder()
@@ -52,7 +52,7 @@ public class OrganizationTeamRepositoryTest {
 
     @Test
     public void deleteOrganizationTeam() {
-        Organization organization = BuilderUtil.buildOrganizacao();
+        Organization organization = BuilderUtil.buildOrganization();
         organization = organizacaoRepository.save(organization);
 
         OrganizationTeam organizationTeam = OrganizationTeam.builder()
@@ -70,7 +70,7 @@ public class OrganizationTeamRepositoryTest {
 
     @Test
     public void searchOrganizationTeam() {
-        Organization organization = BuilderUtil.buildOrganizacao();
+        Organization organization = BuilderUtil.buildOrganization();
         organization = organizacaoRepository.save(organization);
 
         OrganizationTeam organizationTeam = OrganizationTeam.builder()
@@ -86,10 +86,10 @@ public class OrganizationTeamRepositoryTest {
 
     @Test
     public void updateOrganizationTeam() {
-        Organization organization = BuilderUtil.buildOrganizacao();
+        Organization organization = BuilderUtil.buildOrganization();
         organization = organizacaoRepository.save(organization);
 
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
         team = teamRepository.save(team);
 
         OrganizationTeam organizationTeam = OrganizationTeam.builder()
@@ -113,10 +113,10 @@ public class OrganizationTeamRepositoryTest {
 
     @Test
     public void findByTeamId() {
-        Organization organization = BuilderUtil.buildOrganizacao();
+        Organization organization = BuilderUtil.buildOrganization();
         organization = organizacaoRepository.save(organization);
 
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
         team = teamRepository.save(team);
 
         OrganizationTeam organizationTeam = OrganizationTeam.builder()
@@ -133,13 +133,13 @@ public class OrganizationTeamRepositoryTest {
 
     @Test
     public void findByTeamIdAndCollaboratorId() {
-        Organization organization = BuilderUtil.buildOrganizacao();
+        Organization organization = BuilderUtil.buildOrganization();
         organization = organizacaoRepository.save(organization);
 
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
         team = teamRepository.save(team);
 
-        Collaborator col = BuilderUtil.buildColaborador();
+        Collaborator col = BuilderUtil.buildCollaborator();
         col.setUser(userRepository.save(col.getUser()));
         col = collaboratorRepository.save(col);
 

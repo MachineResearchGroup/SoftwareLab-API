@@ -1,10 +1,10 @@
 package com.swl.models.enums;
 
 public enum FunctionEnum {
-  ROLE_USUARIO,
+  ROLE_USER,
   ROLE_PMO,
   ROLE_PO,
-  ROLE_CLIENTE,
+  ROLE_CLIENT,
   ROLE_DEV;
 
 

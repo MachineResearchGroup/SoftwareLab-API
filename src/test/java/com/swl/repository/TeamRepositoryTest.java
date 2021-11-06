@@ -19,7 +19,7 @@ public class TeamRepositoryTest {
 
     @Test
     public void createTeam() {
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
 
         repository.save(team);
         var response = repository.findAll();
@@ -30,7 +30,7 @@ public class TeamRepositoryTest {
 
     @Test
     public void deleteTeam() {
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
 
         team = repository.save(team);
         repository.delete(team);
@@ -43,7 +43,7 @@ public class TeamRepositoryTest {
 
     @Test
     public void searchTeam() {
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
 
         team = repository.save(team);
         Optional<Team> enderecoFound = repository.findById(team.getId());
@@ -54,11 +54,11 @@ public class TeamRepositoryTest {
 
     @Test
     public void updateTeam() {
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
 
         team = repository.save(team);
 
-        Team teamUpdate = BuilderUtil.buildEquipe();
+        Team teamUpdate = BuilderUtil.buildTeam();
         teamUpdate.setId(team.getId());
         teamUpdate.setName("Equipe Update");
 

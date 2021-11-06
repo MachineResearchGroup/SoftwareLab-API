@@ -1,5 +1,6 @@
 package com.swl.controllers;
 
+import com.swl.config.swagger.ApiRoleAccessNotes;
 import com.swl.models.Client;
 import com.swl.models.Organization;
 import com.swl.models.Project;
@@ -11,6 +12,7 @@ import com.swl.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,13 +29,23 @@ public class ProjectController {
     private final ProjectService service;
 
 
+    @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/")
-    @PreAuthorize("hasRole('PO') or hasRole('PMO')")
-    public ResponseEntity<?> registerProject(@RequestBody ProjectRequest project) {
+    @Secured({"ROLE_PO", "ROLE_PMO"})
+    public ResponseEntity<?> registerProject(@RequestBody ProjectRequest projectRequest) {
 
         try {
-            return service.registerProject(project);
+            var response = service.verifyProject(projectRequest);
+
+            if(!response.getStatusCode().equals(HttpStatus.OK)){
+                return response;
+            }
+
+            Project project = service.registerProject(projectRequest);
+
+            return !Objects.isNull(project) ? ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, project)) :
+                    ResponseEntity.badRequest().body(new MessageResponse(MessageEnum.NOT_FOUND, Team.class));
 
         } catch (Exception e) {
             return ResponseEntity
@@ -43,21 +55,24 @@ public class ProjectController {
     }
 
 
+    @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.CREATED)
     @PutMapping("/{idProject}")
-    @PreAuthorize("hasRole('PO') or hasRole('PMO')")
-    public ResponseEntity<?> editProject(@PathVariable("idProject") Integer idProject, @RequestBody ProjectRequest project) {
+    @Secured({"ROLE_PO", "ROLE_PMO"})
+    public ResponseEntity<?> editProject(@PathVariable("idProject") Integer idProject, @RequestBody ProjectRequest projectRequest) {
 
         try {
-            Project editProject = service.editProject(idProject, project);
+            var response = service.verifyProject(projectRequest);
 
-            if (!Objects.isNull(editProject)) {
-                return ResponseEntity.ok(new MessageResponse(MessageEnum.EDITED, editProject));
-            } else {
-                return ResponseEntity
-                        .badRequest()
-                        .body(new MessageResponse(MessageEnum.NOT_FOUND, Project.class));
+            if(!response.getStatusCode().equals(HttpStatus.OK)){
+                return response;
             }
+
+            Project editProject = service.editProject(idProject, projectRequest);
+
+            return !Objects.isNull(editProject) ? ResponseEntity.ok(new MessageResponse(MessageEnum.EDITED, editProject)) :
+                    ResponseEntity.badRequest().body(new MessageResponse(MessageEnum.NOT_FOUND, Project.class));
+
         } catch (Exception e) {
             return ResponseEntity
                     .badRequest()
@@ -66,9 +81,10 @@ public class ProjectController {
     }
 
 
+    @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{idProject}")
-    @PreAuthorize("hasRole('DEV') or hasRole('PO') or hasRole('PMO')")
+    @Secured({"ROLE_DEV", "ROLE_PO", "ROLE_PMO"})
     public ResponseEntity<?> getProject(@PathVariable("idProject") Integer idProject) {
 
         try {
@@ -88,9 +104,10 @@ public class ProjectController {
     }
 
 
+    @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/{idProject}")
-    @PreAuthorize("hasRole('PO') or hasRole('PMO')")
+    @Secured({"ROLE_PO", "ROLE_PMO"})
     public ResponseEntity<?> deleteProject(@PathVariable("idProject") Integer idProject) {
 
         try {
@@ -107,9 +124,10 @@ public class ProjectController {
     }
 
 
+    @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/addClientInProject/}")
-    @PreAuthorize("hasRole('PMO')")
+    @Secured("ROLE_PMO")
     public ResponseEntity<?> addClientInProject(@RequestParam(name = "idProject") Integer idProject,
                                                 @RequestParam(name = "idClient") String clientEmail) {
 
@@ -127,9 +145,10 @@ public class ProjectController {
     }
 
 
+    @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/projectsByTeam/{idTeam}")
-    @PreAuthorize("hasRole('DEV') or hasRole('PO') or hasRole('PMO')")
+    @Secured({"ROLE_DEV", "ROLE_PO", "ROLE_PMO"})
     public ResponseEntity<?> getAllProjectsByTeam(@PathVariable("idTeam") Integer idTeam) {
 
         try {
@@ -149,9 +168,10 @@ public class ProjectController {
     }
 
 
+    @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/projectsByOrganization/{idOrg}")
-    @PreAuthorize("hasRole('DEV') or hasRole('PO') or hasRole('PMO')")
+    @Secured({"ROLE_DEV", "ROLE_PO", "ROLE_PMO"})
     public ResponseEntity<?> getAllProjectsByOrganization(@PathVariable("idOrg") Integer idOrg) {
 
         try {

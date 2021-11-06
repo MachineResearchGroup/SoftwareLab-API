@@ -23,7 +23,7 @@ public class ClientRepositoryTest {
 
     @Test
     public void createClient() {
-        Client client = BuilderUtil.buildCliente();
+        Client client = BuilderUtil.buildClient();
         client.setUser(userRepository.save(client.getUser()));
 
         repository.save(client);
@@ -35,7 +35,7 @@ public class ClientRepositoryTest {
 
     @Test
     public void deleteClient() {
-        Client client = BuilderUtil.buildCliente();
+        Client client = BuilderUtil.buildClient();
         client.setUser(userRepository.save(client.getUser()));
 
         client = repository.save(client);
@@ -49,7 +49,7 @@ public class ClientRepositoryTest {
 
     @Test
     public void searchClient() {
-        Client client = BuilderUtil.buildCliente();
+        Client client = BuilderUtil.buildClient();
         client.setUser(userRepository.save(client.getUser()));
 
         client = repository.save(client);
@@ -61,13 +61,13 @@ public class ClientRepositoryTest {
 
     @Test
     public void updateClient() {
-        Client client = BuilderUtil.buildCliente();
+        Client client = BuilderUtil.buildClient();
         User user = userRepository.save(client.getUser());
 
         client.setUser(user);
         client = repository.save(client);
 
-        Client clientUpdate = BuilderUtil.buildCliente();
+        Client clientUpdate = BuilderUtil.buildClient();
         clientUpdate.setId(client.getId());
         clientUpdate.setUser(user);
         clientUpdate.setCorporateName("Cliente Update");
@@ -80,7 +80,7 @@ public class ClientRepositoryTest {
 
     @Test
     public void findClientByUserId() {
-        Client client = BuilderUtil.buildCliente();
+        Client client = BuilderUtil.buildClient();
         client.setUser(userRepository.save(client.getUser()));
 
         repository.save(client);

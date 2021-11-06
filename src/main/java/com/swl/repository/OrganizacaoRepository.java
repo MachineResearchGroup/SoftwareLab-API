@@ -15,4 +15,6 @@ public interface OrganizacaoRepository extends JpaRepository<Organization, Integ
 
     @Query("select oe.organization from OrganizationTeam oe where oe.team.id =:idEquipe")
     Optional<Organization> findOrganizacaoByEquipeId(@Param("idEquipe") Integer idEquipe);
+
+    Optional<Organization> findOrganizationByCnpj(@Param("cnpj") String cnpj);
 }

@@ -12,7 +12,10 @@ public enum MessageEnum {
     NOT_DELETED("%s was not deleted!"),
     ALREADY_USED("%s is already being used!"),
     ADDED("%s successfully added"),
-    NOT_ADDED("%s have not been added");
+    NOT_ADDED("%s have not been added"),
+    INVALID("Invalid field: %s"),
+    VALID("Valid fields: %s"),
+    ALREADY_EXISTS("%s already exists");
 
     String message;
 

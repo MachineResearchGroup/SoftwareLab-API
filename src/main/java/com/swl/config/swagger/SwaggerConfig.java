@@ -1,4 +1,4 @@
-package com.swl.config;
+package com.swl.config.swagger;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

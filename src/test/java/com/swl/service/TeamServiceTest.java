@@ -1,16 +1,14 @@
 package com.swl.service;
 
 import com.swl.models.Collaborator;
-import com.swl.models.Team;
 import com.swl.models.Organization;
 import com.swl.models.OrganizationTeam;
-import com.swl.models.enums.MessageEnum;
+import com.swl.models.Team;
 import com.swl.payload.request.TeamRequest;
-import com.swl.payload.response.MessageResponse;
 import com.swl.repository.CollaboratorRepository;
-import com.swl.repository.TeamRepository;
-import com.swl.repository.OrganizationTeamRepository;
 import com.swl.repository.OrganizacaoRepository;
+import com.swl.repository.OrganizationTeamRepository;
+import com.swl.repository.TeamRepository;
 import com.swl.util.BuilderUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,9 +19,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 
 @SpringBootTest
@@ -54,7 +54,7 @@ public class TeamServiceTest {
 
     @Test
     public void registerTeam_Sucessfully() {
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
 
         TeamRequest equipeRequest = TeamRequest.builder()
                 .name(team.getName())
@@ -73,13 +73,27 @@ public class TeamServiceTest {
         Mockito.when(repository.save(team)).thenReturn(team);
 
         var response = service.registerTeam(equipeRequest);
-        Assertions.assertEquals(Objects.requireNonNull(response.getStatusCode()), HttpStatus.OK);
+        Assertions.assertNotNull(response);
+
+        team = BuilderUtil.buildTeam();
+
+        equipeRequest = TeamRequest.builder()
+                .name(team.getName())
+                .idOrganization(1)
+                .build();
+
+        Mockito.when(organizacaoRepository.findById(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
+
+        Mockito.when(repository.save(team)).thenReturn(team);
+
+        response = service.registerTeam(equipeRequest);
+        Assertions.assertNotNull(response);
     }
 
 
     @Test
     public void registerTeam_ErrorSupervisorEmail() {
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
 
         TeamRequest equipeRequest = TeamRequest.builder()
                 .name(team.getName())
@@ -92,14 +106,13 @@ public class TeamServiceTest {
 
         var response = service.registerTeam(equipeRequest);
 
-        Assertions.assertEquals(Objects.requireNonNull(response.getBody()),
-                new MessageResponse(MessageEnum.NOT_FOUND, "email"));
+        Assertions.assertNull(response);
     }
 
 
     @Test
     public void registerTeam_ErrorOrganization() {
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
 
         TeamRequest equipeRequest = TeamRequest.builder()
                 .name(team.getName())
@@ -111,14 +124,13 @@ public class TeamServiceTest {
 
         var response = service.registerTeam(equipeRequest);
 
-        Assertions.assertEquals(Objects.requireNonNull(response.getBody()),
-                new MessageResponse(MessageEnum.NOT_REGISTERED, Team.class));
+        Assertions.assertNull(response);
     }
 
 
     @Test
     public void editTeam_Sucessfully() {
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
 
         TeamRequest equipeRequest = TeamRequest.builder()
                 .name("Equipe Update")
@@ -153,7 +165,7 @@ public class TeamServiceTest {
 
     @Test
     public void getTeam_Sucessfully() {
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
         Mockito.when(repository.findById(1)).thenReturn(Optional.of(team));
         var response = service.getTeam(1);
 
@@ -185,7 +197,7 @@ public class TeamServiceTest {
 
     @Test
     public void addColaborador_Sucessfully() {
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
         team.setId(1);
 
         List<Collaborator> collaboratorList = new ArrayList<>(Collections.singletonList(Mockito.mock(Collaborator.class)));
@@ -208,7 +220,7 @@ public class TeamServiceTest {
 
     @Test
     public void addColaborador_Error() {
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
         team.setId(1);
 
         String email = "teste@gmai.com";
@@ -244,10 +256,10 @@ public class TeamServiceTest {
 
     @Test
     public void deleteColaborador_Sucessfully() {
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
         team.setId(1);
 
-        List<Collaborator> collaboratorList = new ArrayList<>(Collections.singletonList(BuilderUtil.buildColaborador()));
+        List<Collaborator> collaboratorList = new ArrayList<>(Collections.singletonList(BuilderUtil.buildCollaborator()));
         collaboratorList.get(0).setId(1);
         String email = "teste@gmai.com";
 
@@ -269,10 +281,10 @@ public class TeamServiceTest {
 
     @Test
     public void deleteColaborador_Error() {
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
         team.setId(1);
 
-        List<Collaborator> collaboratorList = new ArrayList<>(Collections.singletonList(BuilderUtil.buildColaborador()));
+        List<Collaborator> collaboratorList = new ArrayList<>(Collections.singletonList(BuilderUtil.buildCollaborator()));
         collaboratorList.get(0).setId(1);
         String email = "teste@gmai.com";
 
@@ -280,5 +292,19 @@ public class TeamServiceTest {
 
         var response = service.deleteCollaborator(1, new ArrayList<>(Collections.singletonList(email)));
         Assertions.assertNull(response);
+    }
+
+
+    @Test
+    public void getAllTeamByOrganization_Sucessfully() {
+        List<Team> teamList = new ArrayList<>(Collections.singletonList(Mockito.mock(Team.class)));
+
+        Mockito.when(organizacaoRepository.findById(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
+
+        Mockito.when(repository.findAllByOrganizationId(1))
+                .thenReturn(Optional.of(teamList));
+
+        var response = service.getAllTeamByOrganization(1);
+        Assertions.assertEquals(response, teamList);
     }
 }

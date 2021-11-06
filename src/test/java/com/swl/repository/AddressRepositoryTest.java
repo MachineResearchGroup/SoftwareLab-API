@@ -23,8 +23,8 @@ public class AddressRepositoryTest {
 
     @Test
     public void createAddess() {
-        Address address = BuilderUtil.buildEndereco();
-        address.setOrganization(organizacaoRepository.save(BuilderUtil.buildOrganizacao()));
+        Address address = BuilderUtil.buildAddress();
+        address.setOrganization(organizacaoRepository.save(BuilderUtil.buildOrganization()));
 
         repository.save(address);
         var response = repository.findAll();
@@ -35,8 +35,8 @@ public class AddressRepositoryTest {
 
     @Test
     public void deleteAddess() {
-        Address address = BuilderUtil.buildEndereco();
-        address.setOrganization(organizacaoRepository.save(BuilderUtil.buildOrganizacao()));
+        Address address = BuilderUtil.buildAddress();
+        address.setOrganization(organizacaoRepository.save(BuilderUtil.buildOrganization()));
 
         address = repository.save(address);
         repository.delete(address);
@@ -49,8 +49,8 @@ public class AddressRepositoryTest {
 
     @Test
     public void searchAddess() {
-        Address address = BuilderUtil.buildEndereco();
-        address.setOrganization(organizacaoRepository.save(BuilderUtil.buildOrganizacao()));
+        Address address = BuilderUtil.buildAddress();
+        address.setOrganization(organizacaoRepository.save(BuilderUtil.buildOrganization()));
 
         address = repository.save(address);
         Optional<Address> enderecoFound = repository.findById(address.getId());
@@ -61,13 +61,13 @@ public class AddressRepositoryTest {
 
     @Test
     public void updateAddess() {
-        Address address = BuilderUtil.buildEndereco();
-        Organization organization = organizacaoRepository.save(BuilderUtil.buildOrganizacao());
+        Address address = BuilderUtil.buildAddress();
+        Organization organization = organizacaoRepository.save(BuilderUtil.buildOrganization());
         address.setOrganization(organization);
 
         address = repository.save(address);
 
-        Address addressUpdate = BuilderUtil.buildEndereco();
+        Address addressUpdate = BuilderUtil.buildAddress();
         addressUpdate.setId(address.getId());
         addressUpdate.setOrganization(organization);
         addressUpdate.setStreet("Rua update");

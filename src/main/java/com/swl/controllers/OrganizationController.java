@@ -1,5 +1,6 @@
 package com.swl.controllers;
 
+import com.swl.config.swagger.ApiRoleAccessNotes;
 import com.swl.models.Collaborator;
 import com.swl.models.Organization;
 import com.swl.models.enums.MessageEnum;
@@ -9,6 +10,7 @@ import com.swl.service.OrganizationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,13 +27,23 @@ public class OrganizationController {
     private final OrganizationService service;
 
 
+    @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/")
-    @PreAuthorize("hasRole('PMO')")
+    @Secured("ROLE_PMO")
     public ResponseEntity<?> registerOrganization(@RequestBody OrganizationRequest organizationRequest) {
 
         try {
-            return service.registerOrganization(organizationRequest);
+            var response = service.verifyOrganization(organizationRequest);
+
+            if(!response.getStatusCode().equals(HttpStatus.OK)){
+                return response;
+            }
+
+            Organization organization = service.registerOrganization(organizationRequest);
+
+            return !Objects.isNull(organization) ? ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, organization)) :
+                    ResponseEntity.badRequest().body(new MessageResponse(MessageEnum.NOT_REGISTERED, Organization.class));
 
         } catch (Exception e) {
             return ResponseEntity
@@ -41,22 +53,25 @@ public class OrganizationController {
     }
 
 
+    @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.CREATED)
     @PutMapping("/{idOrg}")
-    @PreAuthorize("hasRole('PMO')")
+    @Secured("ROLE_PMO")
     public ResponseEntity<?> editOrganization(@PathVariable("idOrg") Integer idOrg,
                                              @RequestBody OrganizationRequest organizationRequest) {
 
         try {
-            Organization orgEdited = service.editOrganization(idOrg, organizationRequest);
+            var response = service.verifyOrganization(organizationRequest);
 
-            if (!Objects.isNull(orgEdited)) {
-                return ResponseEntity.ok(new MessageResponse(MessageEnum.EDITED, orgEdited));
-            } else {
-                return ResponseEntity
-                        .badRequest()
-                        .body(new MessageResponse(MessageEnum.NOT_FOUND, Organization.class));
+            if(!response.getStatusCode().equals(HttpStatus.OK)){
+                return response;
             }
+
+            Organization organization = service.editOrganization(idOrg, organizationRequest);
+
+            return !Objects.isNull(organization) ? ResponseEntity.ok(new MessageResponse(MessageEnum.EDITED, organization)) :
+                    ResponseEntity.badRequest().body(new MessageResponse(MessageEnum.NOT_FOUND, Organization.class));
+
         } catch (Exception e) {
             return ResponseEntity
                     .badRequest()
@@ -65,9 +80,10 @@ public class OrganizationController {
     }
 
 
+    @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{idOrg}")
-    @PreAuthorize("hasRole('PMO')")
+    @Secured("ROLE_PMO")
     public ResponseEntity<?> getOrganization(@PathVariable("idOrg") Integer idOrg) {
 
         try {
@@ -87,9 +103,10 @@ public class OrganizationController {
     }
 
 
+    @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/collaborators/{idOrg}")
-    @PreAuthorize("hasRole('PMO')")
+    @Secured("ROLE_PMO")
     public ResponseEntity<?> getCollaborators(@PathVariable("idOrg") Integer idOrg) {
 
         try {
@@ -109,9 +126,10 @@ public class OrganizationController {
     }
 
 
+    @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/{idOrg}")
-    @PreAuthorize("hasRole('PMO') ")
+    @Secured("ROLE_PMO")
     public ResponseEntity<?> deleteOrganization(@PathVariable("idOrg") Integer idOrg) {
 
         try {

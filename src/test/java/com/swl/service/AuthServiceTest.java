@@ -31,10 +31,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -87,6 +84,22 @@ public class AuthServiceTest {
         var response = service.registerUser(registerRequest);
 
         Assertions.assertEquals(response.getBody(), new MessageResponse(MessageEnum.REGISTERED, User.class));
+
+        registerRequest = RegisterRequest.builder()
+                .name("Usuario Teste")
+                .username("User")
+                .email("user@gmail.com")
+                .password("1234")
+                .phones(new ArrayList<>(Collections.singletonList("81987633333")))
+                .build();
+
+        Mockito.when(userRepository.existsByUsername(registerRequest.getUsername())).thenReturn(false);
+        Mockito.when(userRepository.existsByEmail(registerRequest.getEmail())).thenReturn(false);
+        Mockito.when(encoder.encode(registerRequest.getPassword())).thenReturn("abc123");
+
+        response = service.registerUser(registerRequest);
+
+        Assertions.assertEquals(response.getBody(), new MessageResponse(MessageEnum.REGISTERED, User.class));
     }
 
 
@@ -129,7 +142,7 @@ public class AuthServiceTest {
 
     @Test
     public void registerCollaborator_Sucessfully() {
-        User user = BuilderUtil.buildUsuario();
+        User user = BuilderUtil.buildUser();
 
         CollaboratorRequest registerRequest = CollaboratorRequest.builder()
                 .email(user.getEmail())
@@ -147,7 +160,7 @@ public class AuthServiceTest {
 
     @Test
     public void registerCollaborator_ErrorEmail() {
-        User user = BuilderUtil.buildUsuario();
+        User user = BuilderUtil.buildUser();
 
         CollaboratorRequest registerRequest = CollaboratorRequest.builder()
                 .email(user.getEmail())
@@ -165,7 +178,7 @@ public class AuthServiceTest {
 
     @Test
     public void registerCollaborator_ErrorFunction() {
-        User user = BuilderUtil.buildUsuario();
+        User user = BuilderUtil.buildUser();
 
         CollaboratorRequest registerRequest = CollaboratorRequest.builder()
                 .email(user.getEmail())
@@ -183,7 +196,7 @@ public class AuthServiceTest {
 
     @Test
     public void registerClient_Sucessfully() {
-        User user = BuilderUtil.buildUsuario();
+        User user = BuilderUtil.buildUser();
 
         ClientRequest registerRequest = ClientRequest.builder()
                 .email(user.getEmail())
@@ -195,12 +208,24 @@ public class AuthServiceTest {
         var response = service.registerClient(registerRequest);
 
         Assertions.assertEquals(response.getBody(), new MessageResponse(MessageEnum.REGISTERED, Client.class));
+
+        registerRequest = ClientRequest.builder()
+                .email(user.getEmail())
+                .corporateName("Cliente ABC")
+                .segments(new ArrayList<>(Collections.singletonList("Machine Learning")))
+                .build();
+
+        Mockito.when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+
+        response = service.registerClient(registerRequest);
+
+        Assertions.assertEquals(response.getBody(), new MessageResponse(MessageEnum.REGISTERED, Client.class));
     }
 
 
     @Test
     public void registerClient_ErrorEmail() {
-        User user = BuilderUtil.buildUsuario();
+        User user = BuilderUtil.buildUser();
 
         ClientRequest registerRequest = ClientRequest.builder()
                 .email(user.getEmail())
@@ -217,7 +242,7 @@ public class AuthServiceTest {
 
     @Test
     public void authenticateUser_Sucessfully() {
-        User user = BuilderUtil.buildUsuario();
+        User user = BuilderUtil.buildUser();
 
         LoginRequest loginRequest = LoginRequest.builder()
                 .email(user.getUsername())
@@ -225,7 +250,7 @@ public class AuthServiceTest {
                 .build();
 
         List<GrantedAuthority> authorities = new ArrayList<>(Collections.singletonList(
-                new SimpleGrantedAuthority(FunctionEnum.ROLE_USUARIO.name())));
+                new SimpleGrantedAuthority(FunctionEnum.ROLE_USER.name())));
 
         Authentication authentication = Mockito.mock(Authentication.class);
 

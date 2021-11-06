@@ -5,12 +5,14 @@ import com.swl.models.Team;
 import com.swl.models.Organization;
 import com.swl.models.OrganizationTeam;
 import com.swl.models.enums.MessageEnum;
+import com.swl.payload.request.OrganizationRequest;
 import com.swl.payload.request.TeamRequest;
 import com.swl.payload.response.MessageResponse;
 import com.swl.repository.CollaboratorRepository;
 import com.swl.repository.TeamRepository;
 import com.swl.repository.OrganizationTeamRepository;
 import com.swl.repository.OrganizacaoRepository;
+import com.swl.util.ModelUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +42,31 @@ public class TeamService {
     private final OrganizationTeamRepository organizationTeamRepository;
 
 
-    public ResponseEntity<?> registerTeam(TeamRequest teamRequest) {
+    public ResponseEntity<?> verifyTeam(TeamRequest teamRequest){
+        ModelUtil modelUtil = ModelUtil.getInstance();
+        Team team = new Team();
+
+        modelUtil.map(teamRequest, team);
+        List<MessageResponse> messageResponses = modelUtil.validate(team);
+
+        if (!Objects.isNull(teamRequest.getSupervisorEmail()) &&
+                collaboratorRepository.findCollaboratorByUserEmail(teamRequest.getSupervisorEmail()).isEmpty()) {
+            messageResponses.add(new MessageResponse(MessageEnum.NOT_FOUND, Collaborator.class));
+        }
+
+        if(organizacaoRepository.findById(teamRequest.getIdOrganization()).isEmpty()){
+            messageResponses.add(new MessageResponse(MessageEnum.NOT_FOUND, Organization.class));
+        }
+
+        if (!messageResponses.isEmpty()) {
+            return ResponseEntity.badRequest().body(messageResponses);
+        }
+
+        return ResponseEntity.ok(new MessageResponse(MessageEnum.VALID, Team.class));
+    }
+
+
+    public Team registerTeam(TeamRequest teamRequest) {
         Optional<Organization> org = organizacaoRepository.findById(teamRequest.getIdOrganization());
 
         if (org.isPresent()) {
@@ -53,10 +79,8 @@ public class TeamService {
                             .name(teamRequest.getName())
                             .supervisor(colaborador.get())
                             .build();
-                } else {
-                    return ResponseEntity
-                            .badRequest()
-                            .body(new MessageResponse(MessageEnum.NOT_FOUND, "email"));
+                } else{
+                    return null;
                 }
                 team = repository.save(team);
 
@@ -81,14 +105,11 @@ public class TeamService {
                     .build();
 
             organizationTeamRepository.save(organizationTeam);
+            return team;
 
-            return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, team));
         } else {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.NOT_REGISTERED, Team.class));
+            return null;
         }
-
     }
 
 

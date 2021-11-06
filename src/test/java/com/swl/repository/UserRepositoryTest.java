@@ -19,7 +19,7 @@ public class UserRepositoryTest {
 
     @Test
     public void createUser() {
-        User user = BuilderUtil.buildUsuario();
+        User user = BuilderUtil.buildUser();
 
         repository.save(user);
         var response = repository.findAll();
@@ -30,7 +30,7 @@ public class UserRepositoryTest {
 
     @Test
     public void deleteUser() {
-        User user = BuilderUtil.buildUsuario();
+        User user = BuilderUtil.buildUser();
 
         user = repository.save(user);
         repository.delete(user);
@@ -43,7 +43,7 @@ public class UserRepositoryTest {
 
     @Test
     public void searchUser() {
-        User user = BuilderUtil.buildUsuario();
+        User user = BuilderUtil.buildUser();
 
         user = repository.save(user);
         Optional<User> clienteFound = repository.findById(user.getId());
@@ -54,11 +54,11 @@ public class UserRepositoryTest {
 
     @Test
     public void updateUser() {
-        User user = BuilderUtil.buildUsuario();
+        User user = BuilderUtil.buildUser();
 
         user = repository.save(user);
 
-        User userUpdate = BuilderUtil.buildUsuario();
+        User userUpdate = BuilderUtil.buildUser();
         userUpdate.setId(user.getId());
         userUpdate.setUsername("Username Update");
 
@@ -70,7 +70,7 @@ public class UserRepositoryTest {
 
     @Test
     public void findByUsername() {
-        User user = BuilderUtil.buildUsuario();
+        User user = BuilderUtil.buildUser();
         user = repository.save(user);
 
         Optional<User> responseFinal = repository.findByUsername(user.getUsername());
@@ -80,7 +80,7 @@ public class UserRepositoryTest {
 
     @Test
     public void findByEmail() {
-        User user = BuilderUtil.buildUsuario();
+        User user = BuilderUtil.buildUser();
         user = repository.save(user);
 
         Optional<User> responseFinal = repository.findByEmail(user.getEmail());
@@ -90,7 +90,7 @@ public class UserRepositoryTest {
 
     @Test
     public void existsByUsername() {
-        User user = BuilderUtil.buildUsuario();
+        User user = BuilderUtil.buildUser();
         user = repository.save(user);
 
         Assertions.assertTrue(repository.existsByUsername(user.getUsername()));
@@ -99,7 +99,7 @@ public class UserRepositoryTest {
 
     @Test
     public void existsByEmail() {
-        User user = BuilderUtil.buildUsuario();
+        User user = BuilderUtil.buildUser();
         user = repository.save(user);
 
         Assertions.assertTrue(repository.existsByEmail(user.getEmail()));

@@ -40,7 +40,7 @@ public class UserDetailsImpl implements UserDetails {
     public static UserDetailsImpl build(Object usuario) {
 
         List<GrantedAuthority> authorities = new ArrayList<>(Collections.singletonList(
-                new SimpleGrantedAuthority(FunctionEnum.ROLE_USUARIO.name())));
+                new SimpleGrantedAuthority(FunctionEnum.ROLE_USER.name())));
 
         if (usuario instanceof Collaborator) {
             authorities.add(new SimpleGrantedAuthority(((Collaborator) usuario).getFunction()));
@@ -51,7 +51,7 @@ public class UserDetailsImpl implements UserDetails {
                     ((Collaborator) usuario).getUser().getPassword(),
                     authorities);
         } else if (usuario instanceof Client) {
-            authorities.add(new SimpleGrantedAuthority(FunctionEnum.ROLE_CLIENTE.name()));
+            authorities.add(new SimpleGrantedAuthority(FunctionEnum.ROLE_CLIENT.name()));
 
             return new UserDetailsImpl(
                     ((Client) usuario).getId(),

@@ -20,7 +20,7 @@ public class ProjectRepositoryTest {
 
     @Test
     public void createProject() {
-        Project project = BuilderUtil.buildProjeto();
+        Project project = BuilderUtil.buildProject();
 
         repository.save(project);
         var response = repository.findAll();
@@ -31,7 +31,7 @@ public class ProjectRepositoryTest {
 
     @Test
     public void deleteProject() {
-        Project project = BuilderUtil.buildProjeto();
+        Project project = BuilderUtil.buildProject();
 
         project = repository.save(project);
         repository.delete(project);
@@ -44,7 +44,7 @@ public class ProjectRepositoryTest {
 
     @Test
     public void searchProject() {
-        Project project = BuilderUtil.buildProjeto();
+        Project project = BuilderUtil.buildProject();
 
         project = repository.save(project);
         Optional<Project> enderecoFound = repository.findById(project.getId());
@@ -55,10 +55,10 @@ public class ProjectRepositoryTest {
 
     @Test
     public void updateProject() {
-        Project project = BuilderUtil.buildProjeto();
+        Project project = BuilderUtil.buildProject();
         project = repository.save(project);
 
-        Project projectUpdate = BuilderUtil.buildProjeto();
+        Project projectUpdate = BuilderUtil.buildProject();
         projectUpdate.setId(project.getId());
         projectUpdate.setName("Projeto Update");
 

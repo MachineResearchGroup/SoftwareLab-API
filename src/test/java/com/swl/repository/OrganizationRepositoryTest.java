@@ -27,7 +27,7 @@ public class OrganizationRepositoryTest {
 
     @Test
     public void createOrganization() {
-        Organization organization = BuilderUtil.buildOrganizacao();
+        Organization organization = BuilderUtil.buildOrganization();
 
         repository.save(organization);
         var response = repository.findAll();
@@ -38,7 +38,7 @@ public class OrganizationRepositoryTest {
 
     @Test
     public void deleteOrganization() {
-        Organization organization = BuilderUtil.buildOrganizacao();
+        Organization organization = BuilderUtil.buildOrganization();
 
         organization = repository.save(organization);
         repository.delete(organization);
@@ -51,7 +51,7 @@ public class OrganizationRepositoryTest {
 
     @Test
     public void searchOrganization() {
-        Organization organization = BuilderUtil.buildOrganizacao();
+        Organization organization = BuilderUtil.buildOrganization();
 
         organization = repository.save(organization);
         Optional<Organization> enderecoFound = repository.findById(organization.getId());
@@ -62,11 +62,11 @@ public class OrganizationRepositoryTest {
 
     @Test
     public void updateOrganization() {
-        Organization organization = BuilderUtil.buildOrganizacao();
+        Organization organization = BuilderUtil.buildOrganization();
 
         organization = repository.save(organization);
 
-        Organization organizationUpdate = BuilderUtil.buildOrganizacao();
+        Organization organizationUpdate = BuilderUtil.buildOrganization();
         organizationUpdate.setId(organization.getId());
         organizationUpdate.setName("Organizacao Update");
 
@@ -78,10 +78,10 @@ public class OrganizationRepositoryTest {
 
     @Test
     public void findByTeamId() {
-        Organization organization = BuilderUtil.buildOrganizacao();
+        Organization organization = BuilderUtil.buildOrganization();
         organization = repository.save(organization);
 
-        Team team = BuilderUtil.buildEquipe();
+        Team team = BuilderUtil.buildTeam();
         team = teamRepository.save(team);
 
         OrganizationTeam organizationTeam = OrganizationTeam.builder()
