@@ -18,7 +18,7 @@
 
 ``` 
 # Clone o repositório do projeto
-$ git clone https://github.com/isi-tics/sgt-webservice.git
+$ git clone https://github.com/MachineResearchGroup/SoftwareLab-API.git
 
 Apos clonar altere as seguintes informações no application-homol.properties
 spring.datasource.url (nome do banco de dados e porta utilizada)
