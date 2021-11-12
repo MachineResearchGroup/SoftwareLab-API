@@ -1,8 +1,8 @@
 <h1 align="center">SoftwareLab API</h1>
 
-
+<!-- 
 <p align="center">
- <img src="sgtws.png" width="520" alt="SGT Webservice Logo" />
+ <img src="softwarelab.png" width="520" alt="SoftwareLab Logo" /> -->
 
 
 <h2 align="center">💻Tecnologias Utilizadas </h2>
