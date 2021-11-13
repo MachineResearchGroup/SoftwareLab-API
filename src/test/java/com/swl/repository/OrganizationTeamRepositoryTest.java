@@ -21,7 +21,7 @@ public class OrganizationTeamRepositoryTest {
     private TeamRepository teamRepository;
 
     @Autowired
-    private OrganizacaoRepository organizacaoRepository;
+    private OrganizationRepository organizationRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -36,7 +36,7 @@ public class OrganizationTeamRepositoryTest {
     @Test
     public void createOrganizationTeam() {
         Organization organization = BuilderUtil.buildOrganization();
-        organization = organizacaoRepository.save(organization);
+        organization = organizationRepository.save(organization);
 
         OrganizationTeam organizationTeam = OrganizationTeam.builder()
                 .organization(organization)
@@ -53,7 +53,7 @@ public class OrganizationTeamRepositoryTest {
     @Test
     public void deleteOrganizationTeam() {
         Organization organization = BuilderUtil.buildOrganization();
-        organization = organizacaoRepository.save(organization);
+        organization = organizationRepository.save(organization);
 
         OrganizationTeam organizationTeam = OrganizationTeam.builder()
                 .organization(organization)
@@ -71,7 +71,7 @@ public class OrganizationTeamRepositoryTest {
     @Test
     public void searchOrganizationTeam() {
         Organization organization = BuilderUtil.buildOrganization();
-        organization = organizacaoRepository.save(organization);
+        organization = organizationRepository.save(organization);
 
         OrganizationTeam organizationTeam = OrganizationTeam.builder()
                 .organization(organization)
@@ -87,7 +87,7 @@ public class OrganizationTeamRepositoryTest {
     @Test
     public void updateOrganizationTeam() {
         Organization organization = BuilderUtil.buildOrganization();
-        organization = organizacaoRepository.save(organization);
+        organization = organizationRepository.save(organization);
 
         Team team = BuilderUtil.buildTeam();
         team = teamRepository.save(team);
@@ -114,7 +114,7 @@ public class OrganizationTeamRepositoryTest {
     @Test
     public void findByTeamId() {
         Organization organization = BuilderUtil.buildOrganization();
-        organization = organizacaoRepository.save(organization);
+        organization = organizationRepository.save(organization);
 
         Team team = BuilderUtil.buildTeam();
         team = teamRepository.save(team);
@@ -134,7 +134,7 @@ public class OrganizationTeamRepositoryTest {
     @Test
     public void findByTeamIdAndCollaboratorId() {
         Organization organization = BuilderUtil.buildOrganization();
-        organization = organizacaoRepository.save(organization);
+        organization = organizationRepository.save(organization);
 
         Team team = BuilderUtil.buildTeam();
         team = teamRepository.save(team);

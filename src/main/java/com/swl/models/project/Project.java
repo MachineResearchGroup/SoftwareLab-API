@@ -5,6 +5,7 @@ import com.swl.models.user.Client;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
 
@@ -14,8 +15,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "clients")
-@EqualsAndHashCode(exclude="clients")
+@ToString(exclude = {"clients", "requirements", "epics", "boards", "redactions", "documents", "events"})
+@EqualsAndHashCode(exclude = {"clients", "requirements", "epics", "boards", "redactions", "documents", "events"})
 public class Project {
 
     @Id
@@ -36,12 +37,28 @@ public class Project {
     private List<Client> clients;
 
     @JsonIgnore
-    @OneToMany(mappedBy="project")
+    @OneToMany(mappedBy = "project")
     private List<Epic> epics;
 
     @JsonIgnore
-    @OneToMany(mappedBy="project")
+    @OneToMany(mappedBy = "project")
     private List<Board> boards;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "project")
+    private List<Redaction> redactions;
+
+    @JsonIgnore
+    @ManyToMany
+    private List<Requirement> requirements;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "project")
+    private List<Document> documents;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "project")
+    private List<Event> events;
 
     @ManyToMany
     private List<Label> labels;

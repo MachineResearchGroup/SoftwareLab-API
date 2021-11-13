@@ -10,7 +10,7 @@ import java.util.Optional;
 
 
 @Repository
-public interface OrganizacaoRepository extends JpaRepository<Organization, Integer> {
+public interface OrganizationRepository extends JpaRepository<Organization, Integer> {
 
     @Query("select oe.organization from OrganizationTeam oe where oe.team.id =:idEquipe")
     Optional<Organization> findOrganizacaoByEquipeId(@Param("idEquipe") Integer idEquipe);

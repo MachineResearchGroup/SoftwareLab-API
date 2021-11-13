@@ -10,7 +10,7 @@ import com.swl.payload.request.OrganizationRequest;
 import com.swl.payload.response.MessageResponse;
 import com.swl.repository.CollaboratorRepository;
 import com.swl.repository.OrganizationTeamRepository;
-import com.swl.repository.OrganizacaoRepository;
+import com.swl.repository.OrganizationRepository;
 import com.swl.util.CopyUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import java.util.Optional;
 public class OrganizationService {
 
     @Autowired
-    private final OrganizacaoRepository repository;
+    private final OrganizationRepository repository;
 
     @Autowired
     private final CollaboratorRepository collaboratorRepository;

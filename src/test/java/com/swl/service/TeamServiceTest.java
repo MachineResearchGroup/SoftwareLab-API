@@ -6,7 +6,7 @@ import com.swl.models.management.OrganizationTeam;
 import com.swl.models.management.Team;
 import com.swl.payload.request.TeamRequest;
 import com.swl.repository.CollaboratorRepository;
-import com.swl.repository.OrganizacaoRepository;
+import com.swl.repository.OrganizationRepository;
 import com.swl.repository.OrganizationTeamRepository;
 import com.swl.repository.TeamRepository;
 import com.swl.util.BuilderUtil;
@@ -35,7 +35,7 @@ public class TeamServiceTest {
     private TeamRepository repository;
 
     @Mock
-    private OrganizacaoRepository organizacaoRepository;
+    private OrganizationRepository organizationRepository;
 
     @Mock
     private CollaboratorRepository collaboratorRepository;
@@ -48,7 +48,7 @@ public class TeamServiceTest {
 
     @BeforeEach
     public void initUseCase() {
-        service = new TeamService(repository, organizacaoRepository, collaboratorRepository, organizationTeamRepository);
+        service = new TeamService(repository, organizationRepository, collaboratorRepository, organizationTeamRepository);
     }
 
 
@@ -62,7 +62,7 @@ public class TeamServiceTest {
                 .idOrganization(1)
                 .build();
 
-        Mockito.when(organizacaoRepository.findById(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
+        Mockito.when(organizationRepository.findById(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
 
         Collaborator gerente = Mockito.mock(Collaborator.class);
         Mockito.when(collaboratorRepository.findCollaboratorByUserEmail(equipeRequest.getSupervisorEmail()))
@@ -82,7 +82,7 @@ public class TeamServiceTest {
                 .idOrganization(1)
                 .build();
 
-        Mockito.when(organizacaoRepository.findById(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
+        Mockito.when(organizationRepository.findById(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
 
         Mockito.when(repository.save(team)).thenReturn(team);
 
@@ -101,7 +101,7 @@ public class TeamServiceTest {
                 .idOrganization(1)
                 .build();
 
-        Mockito.when(organizacaoRepository.findById(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
+        Mockito.when(organizationRepository.findById(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
         Mockito.when(collaboratorRepository.findCollaboratorByUserEmail(equipeRequest.getSupervisorEmail())).thenReturn(Optional.empty());
 
         var response = service.registerTeam(equipeRequest);
@@ -120,7 +120,7 @@ public class TeamServiceTest {
                 .idOrganization(1)
                 .build();
 
-        Mockito.when(organizacaoRepository.findById(1)).thenReturn(Optional.empty());
+        Mockito.when(organizationRepository.findById(1)).thenReturn(Optional.empty());
 
         var response = service.registerTeam(equipeRequest);
 
@@ -205,7 +205,7 @@ public class TeamServiceTest {
 
         Mockito.when(repository.findById(1)).thenReturn(Optional.of(team));
 
-        Mockito.when(organizacaoRepository.findOrganizacaoByEquipeId(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
+        Mockito.when(organizationRepository.findOrganizacaoByEquipeId(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
 
         Mockito.when(collaboratorRepository.findCollaboratorByUserEmail(email))
                 .thenReturn(Optional.of(Mockito.mock(Collaborator.class)));
@@ -299,7 +299,7 @@ public class TeamServiceTest {
     public void getAllTeamByOrganization_Sucessfully() {
         List<Team> teamList = new ArrayList<>(Collections.singletonList(Mockito.mock(Team.class)));
 
-        Mockito.when(organizacaoRepository.findById(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
+        Mockito.when(organizationRepository.findById(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
 
         Mockito.when(repository.findAllByOrganizationId(1))
                 .thenReturn(Optional.of(teamList));

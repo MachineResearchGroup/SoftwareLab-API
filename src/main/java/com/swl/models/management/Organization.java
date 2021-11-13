@@ -30,8 +30,8 @@ public class Organization {
     private String name;
 
     @NotNull
-    @Size(max = 18)
-    @CNPJ(message = "Invalid cpnj format")
+//    @Size(max = 18)
+//    @CNPJ(message = "Invalid cpnj format")
     private String cnpj;
 
     @OneToOne(mappedBy = "organization", cascade = CascadeType.ALL)

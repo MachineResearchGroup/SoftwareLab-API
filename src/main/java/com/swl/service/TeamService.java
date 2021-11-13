@@ -10,7 +10,7 @@ import com.swl.payload.response.MessageResponse;
 import com.swl.repository.CollaboratorRepository;
 import com.swl.repository.TeamRepository;
 import com.swl.repository.OrganizationTeamRepository;
-import com.swl.repository.OrganizacaoRepository;
+import com.swl.repository.OrganizationRepository;
 import com.swl.util.ModelUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class TeamService {
     private final TeamRepository repository;
 
     @Autowired
-    private final OrganizacaoRepository organizacaoRepository;
+    private final OrganizationRepository organizationRepository;
 
     @Autowired
     private final CollaboratorRepository collaboratorRepository;
@@ -53,7 +53,7 @@ public class TeamService {
             messageResponses.add(new MessageResponse(MessageEnum.NOT_FOUND, Collaborator.class));
         }
 
-        if(organizacaoRepository.findById(teamRequest.getIdOrganization()).isEmpty()){
+        if(organizationRepository.findById(teamRequest.getIdOrganization()).isEmpty()){
             messageResponses.add(new MessageResponse(MessageEnum.NOT_FOUND, Organization.class));
         }
 
@@ -66,7 +66,7 @@ public class TeamService {
 
 
     public Team registerTeam(TeamRequest teamRequest) {
-        Optional<Organization> org = organizacaoRepository.findById(teamRequest.getIdOrganization());
+        Optional<Organization> org = organizationRepository.findById(teamRequest.getIdOrganization());
 
         if (org.isPresent()) {
             Team team;
@@ -151,7 +151,7 @@ public class TeamService {
         Optional<Team> teamOptional = repository.findById(idTeam);
 
         if (teamOptional.isPresent()) {
-            Optional<Organization> orgOptional = organizacaoRepository.findOrganizacaoByEquipeId(teamOptional.get().getId());
+            Optional<Organization> orgOptional = organizationRepository.findOrganizacaoByEquipeId(teamOptional.get().getId());
 
             if (orgOptional.isPresent()) {
                 List<Optional<Collaborator>> userList = emails.stream()
@@ -211,7 +211,7 @@ public class TeamService {
 
 
     public List<Team> getAllTeamByOrganization(Integer idOrganization){
-        Optional<Organization> organization = organizacaoRepository.findById(idOrganization);
+        Optional<Organization> organization = organizationRepository.findById(idOrganization);
 
         return organization.map(value -> repository.findAllByOrganizationId(idOrganization)
                 .orElseGet(ArrayList::new))

@@ -1,6 +1,7 @@
 package com.swl.repository;
 
 import com.swl.models.user.Collaborator;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,5 +23,9 @@ public interface CollaboratorRepository extends JpaRepository<Collaborator, Inte
 
     @Query("select oe.collaborator from OrganizationTeam oe where oe.team.id =:idTeam")
     Optional<List<Collaborator>> findAllCollaboratorByTeamId(@Param("idTeam") Integer idTeam);
+
+    @Query("select oe.collaborator from OrganizationTeam oe where oe.organization.id =:idOrg " +
+            "order by oe.collaborator.register desc")
+    Optional<List<Collaborator>> findLastCollaboratorByRegister(@Param("idOrg") Integer idOrg);
 
 }

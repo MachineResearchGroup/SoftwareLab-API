@@ -5,7 +5,8 @@ public enum FunctionEnum {
   ROLE_PMO,
   ROLE_PO,
   ROLE_CLIENT,
-  ROLE_DEV;
+  ROLE_DEV,
+  ROLE_ADMIN;
 
 
   public static boolean exists(String function){

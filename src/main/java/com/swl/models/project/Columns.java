@@ -33,6 +33,10 @@ public class Columns {
     @OneToMany(mappedBy = "column")
     private List<History> histories;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "column")
+    private List<Task> tasks;
+
     @ManyToMany
     private List<Label> labels;
 

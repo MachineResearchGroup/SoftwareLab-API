@@ -22,7 +22,7 @@ public class OrganizationRepositoryTest {
     private OrganizationTeamRepository organizationTeamRepository;
 
     @Autowired
-    private OrganizacaoRepository repository;
+    private OrganizationRepository repository;
 
 
     @Test

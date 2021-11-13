@@ -15,7 +15,7 @@ import java.util.Optional;
 public class AddressRepositoryTest {
 
     @Autowired
-    private OrganizacaoRepository organizacaoRepository;
+    private OrganizationRepository organizationRepository;
 
     @Autowired
     private AddressRepository repository;
@@ -24,7 +24,7 @@ public class AddressRepositoryTest {
     @Test
     public void createAddess() {
         Address address = BuilderUtil.buildAddress();
-        address.setOrganization(organizacaoRepository.save(BuilderUtil.buildOrganization()));
+        address.setOrganization(organizationRepository.save(BuilderUtil.buildOrganization()));
 
         repository.save(address);
         var response = repository.findAll();
@@ -36,7 +36,7 @@ public class AddressRepositoryTest {
     @Test
     public void deleteAddess() {
         Address address = BuilderUtil.buildAddress();
-        address.setOrganization(organizacaoRepository.save(BuilderUtil.buildOrganization()));
+        address.setOrganization(organizationRepository.save(BuilderUtil.buildOrganization()));
 
         address = repository.save(address);
         repository.delete(address);
@@ -50,7 +50,7 @@ public class AddressRepositoryTest {
     @Test
     public void searchAddess() {
         Address address = BuilderUtil.buildAddress();
-        address.setOrganization(organizacaoRepository.save(BuilderUtil.buildOrganization()));
+        address.setOrganization(organizationRepository.save(BuilderUtil.buildOrganization()));
 
         address = repository.save(address);
         Optional<Address> enderecoFound = repository.findById(address.getId());
@@ -62,7 +62,7 @@ public class AddressRepositoryTest {
     @Test
     public void updateAddess() {
         Address address = BuilderUtil.buildAddress();
-        Organization organization = organizacaoRepository.save(BuilderUtil.buildOrganization());
+        Organization organization = organizationRepository.save(BuilderUtil.buildOrganization());
         address.setOrganization(organization);
 
         address = repository.save(address);

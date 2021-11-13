@@ -22,7 +22,7 @@ public class CollaboratorRepositoryTest {
     private UserRepository userRepository;
 
     @Autowired
-    private OrganizacaoRepository organizacaoRepository;
+    private OrganizationRepository organizationRepository;
 
     @Autowired
     private TeamRepository teamRepository;
@@ -118,7 +118,7 @@ public class CollaboratorRepositoryTest {
     @Test
     public void findAllCollaboratorByOrganizationId() {
         Organization organization = BuilderUtil.buildOrganization();
-        organization = organizacaoRepository.save(organization);
+        organization = organizationRepository.save(organization);
 
         Collaborator col = BuilderUtil.buildCollaborator();
         col.setUser(userRepository.save(col.getUser()));
@@ -138,7 +138,7 @@ public class CollaboratorRepositoryTest {
     @Test
     public void findAllCollaboratorByTeamId() {
         Organization organization = BuilderUtil.buildOrganization();
-        organization = organizacaoRepository.save(organization);
+        organization = organizationRepository.save(organization);
 
         Team team = BuilderUtil.buildTeam();
         team = teamRepository.save(team);

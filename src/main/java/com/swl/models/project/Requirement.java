@@ -1,14 +1,15 @@
 package com.swl.models.project;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.swl.models.user.Client;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.validation.constraints.Size;
-import java.time.LocalDate;
-import java.util.List;
 
 
 @Data
@@ -16,8 +17,6 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "projects")
-@EqualsAndHashCode(exclude = "projects")
 public class Requirement {
 
     @Id
@@ -30,10 +29,5 @@ public class Requirement {
     private String category;
 
     private String subcategory;
-
-    @NotNull
-    @JsonIgnore
-    @ManyToMany
-    private List<Project> projects;
 
 }

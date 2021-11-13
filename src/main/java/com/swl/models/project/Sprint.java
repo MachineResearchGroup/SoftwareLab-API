@@ -29,11 +29,6 @@ public class Sprint {
     @ManyToOne
     private Epic epic;
 
-    @NotNull
-    @JsonIgnore
-    @ManyToOne
-    private Project project;
-
     @Size(max = 500)
     private String description;
 

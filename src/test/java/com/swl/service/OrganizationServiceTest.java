@@ -6,7 +6,7 @@ import com.swl.payload.request.AddessRequest;
 import com.swl.payload.request.OrganizationRequest;
 import com.swl.repository.CollaboratorRepository;
 import com.swl.repository.OrganizationTeamRepository;
-import com.swl.repository.OrganizacaoRepository;
+import com.swl.repository.OrganizationRepository;
 import com.swl.util.BuilderUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +27,7 @@ import java.util.*;
 public class OrganizationServiceTest {
 
     @Mock
-    private OrganizacaoRepository repository;
+    private OrganizationRepository repository;
 
     @Mock
     private CollaboratorRepository collaboratorRepository;
