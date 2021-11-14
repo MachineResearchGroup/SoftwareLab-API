@@ -15,10 +15,10 @@ import java.util.List;
 public class CopyUtil {
 
 
-    private static final List<String> organizationPropsExclude = new ArrayList<>(Collections.singletonList("address"));
+    private static final List<String> organizationPropsExclude = new ArrayList<>(Arrays.asList("address", "id"));
 
     public static void copyProperties(Object src, Object trg) {
-        List<String> excludeProps = new ArrayList<>();
+        List<String> excludeProps = new ArrayList<>(Collections.singletonList("id"));
 
         if (trg instanceof Organization){
             excludeProps = organizationPropsExclude;
