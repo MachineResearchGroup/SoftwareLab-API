@@ -56,7 +56,7 @@ public class TaskController {
     @ResponseStatus(HttpStatus.CREATED)
     @PutMapping("/{idTask}")
     @Secured({"ROLE_DEV", "ROLE_PO"})
-    public ResponseEntity<?> editColumn(@PathVariable("idTask") Integer idTask, @RequestBody TaskRequest taskRequest) {
+    public ResponseEntity<?> editTask(@PathVariable("idTask") Integer idTask, @RequestBody TaskRequest taskRequest) {
 
         try {
             var response = service.verifyTask(taskRequest);
@@ -105,7 +105,7 @@ public class TaskController {
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/{idTask}")
     @Secured({"ROLE_DEV", "ROLE_PO"})
-    public ResponseEntity<?> deleteColumn(@PathVariable("idTask") Integer idTask) {
+    public ResponseEntity<?> deleteTask(@PathVariable("idTask") Integer idTask) {
 
         try {
             boolean deleteTask = service.deleteTask(idTask);
@@ -125,7 +125,7 @@ public class TaskController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/all/{idColumn}")
     @Secured({"ROLE_DEV", "ROLE_PO", "ROLE_PMO"})
-    public ResponseEntity<?> getAllColumns(@PathVariable(value = "idColumn") Integer idColumn) {
+    public ResponseEntity<?> getAllByColumns(@PathVariable(value = "idColumn") Integer idColumn) {
 
         try {
             List<Task> tasks = service.getAllTaskByColumn(idColumn);
