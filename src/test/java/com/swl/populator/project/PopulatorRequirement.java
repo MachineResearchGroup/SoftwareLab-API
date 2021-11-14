@@ -26,13 +26,19 @@ public class PopulatorRequirement {
         return requirements.stream().map(r -> Requirement.builder()
                 .description(r.get(1))
                 .category(r.get(2))
-                .build()).collect(Collectors.toList());
+                .build()
+        ).collect(Collectors.toList());
+
     }
 
 
     public void saveAll() {
         List<Requirement> requirements = createAll();
-        requirementRepository.saveAll(requirements);
+
+        requirements.forEach(r -> {
+            if (requirementRepository.findRequirementByDescription(r.getDescription()).isEmpty())
+                requirementRepository.save(r);
+        });
     }
 
 }

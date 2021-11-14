@@ -62,12 +62,10 @@ public class PopulatorTask {
 
         task = taskRepository.save(task);
 
-        int numberLabels = FakerUtil.getInstance().faker.number().numberBetween(2, config.getMaxNumberLabels());
-
         // Save Labels
         task.setLabels(new ArrayList<>());
         Task finalTask = task;
-        IntStream.range(0, numberLabels).forEach(e -> {
+        IntStream.range(0, config.getNumberLabels()).forEach(e -> {
             finalTask.getLabels().add(populatorLabel.save());
         });
 
@@ -81,12 +79,10 @@ public class PopulatorTask {
 
         task = taskRepository.save(task);
 
-        int numberLabels = FakerUtil.getInstance().faker.number().numberBetween(2, config.getMaxNumberLabels());
-
         // Save Labels
         task.setLabels(new ArrayList<>());
         Task finalTask = task;
-        IntStream.range(0, numberLabels).forEach(e -> {
+        IntStream.range(0, config.getNumberLabels()).forEach(e -> {
             finalTask.getLabels().add(populatorLabel.save());
         });
 

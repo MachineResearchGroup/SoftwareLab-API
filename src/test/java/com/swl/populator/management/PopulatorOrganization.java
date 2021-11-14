@@ -94,7 +94,7 @@ public class PopulatorOrganization {
                     .build());
 
             Organization finalOrganization = organization;
-            IntStream.range(0, FakerUtil.getInstance().faker.number().numberBetween(2, config.getMaxNumberTeams()))
+            IntStream.range(0, config.getNumberTeams())
                     .forEach(i -> populatorTeam.save(finalOrganization, config));
         });
     }

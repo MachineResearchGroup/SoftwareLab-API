@@ -39,18 +39,16 @@ public class PopulatorBoard {
 
         board = boardRepository.save(board);
 
-        int numberLabels = FakerUtil.getInstance().faker.number().numberBetween(2, config.getMaxNumberLabels());
-
         // Save Columns
         board.setColumns(new ArrayList<>());
         Board finalBoard = board;
-        IntStream.range(0, numberLabels).forEach(e -> {
+        IntStream.range(0, config.getNumberColumnsByBoard()).forEach(e -> {
             finalBoard.getColumns().add(populatorColumn.save(finalBoard, config));
         });
 
         // Save Labels
         finalBoard.setLabels(new ArrayList<>());
-        IntStream.range(0, numberLabels).forEach(e -> {
+        IntStream.range(0, config.getNumberLabels()).forEach(e -> {
             finalBoard.getLabels().add(populatorLabel.save());
         });
 

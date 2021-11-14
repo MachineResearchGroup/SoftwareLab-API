@@ -2,10 +2,8 @@ package com.swl.populator.project;
 
 import com.swl.models.project.Board;
 import com.swl.models.project.Columns;
-import com.swl.models.project.Project;
 import com.swl.populator.config.PopulatorConfig;
 import com.swl.populator.util.FakerUtil;
-import com.swl.repository.BoardRepository;
 import com.swl.repository.ColumnRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,24 +42,22 @@ public class PopulatorColumn {
 
         columns = columnRepository.save(columns);
 
-        int numberLabels = FakerUtil.getInstance().faker.number().numberBetween(2, config.getMaxNumberLabels());
-
         // Save Histories
         Columns finalColumns = columns;
         finalColumns.setHistories(new ArrayList<>());
-        IntStream.range(0, numberLabels).forEach(e -> {
+        IntStream.range(0, config.getNumberHistoriesByColumn()).forEach(e -> {
             finalColumns.getHistories().add(populatorHistory.save(finalColumns, config));
         });
 
         // Save Taks
         finalColumns.setTasks(new ArrayList<>());
-        IntStream.range(0, numberLabels).forEach(e -> {
+        IntStream.range(0, config.getNumberTasksByColumn()).forEach(e -> {
             finalColumns.getTasks().add(populatorTask.save(finalColumns, config));
         });
 
         // Save Labels
         finalColumns.setLabels(new ArrayList<>());
-        IntStream.range(0, numberLabels).forEach(e -> {
+        IntStream.range(0, config.getNumberLabels()).forEach(e -> {
             finalColumns.getLabels().add(populatorLabel.save());
         });
 

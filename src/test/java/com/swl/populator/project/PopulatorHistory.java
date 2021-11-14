@@ -63,18 +63,16 @@ public class PopulatorHistory {
 
         history = historyRepository.save(history);
 
-        int numberLabels = FakerUtil.getInstance().faker.number().numberBetween(2, config.getMaxNumberLabels());
-
         // Save Taks
         history.setTasks(new ArrayList<>());
         History finalHistory = history;
-        IntStream.range(0, numberLabels).forEach(e -> {
+        IntStream.range(0, config.getNumberTasksByHistory()).forEach(e -> {
             finalHistory.getTasks().add(populatorTask.saveFromHistory(column, finalHistory, config));
         });
 
         // Save Labels
         finalHistory.setLabels(new ArrayList<>());
-        IntStream.range(0, numberLabels).forEach(e -> {
+        IntStream.range(0, config.getNumberLabels()).forEach(e -> {
             finalHistory.getLabels().add(populatorLabel.save());
         });
 

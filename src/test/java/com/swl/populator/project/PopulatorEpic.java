@@ -66,12 +66,10 @@ public class PopulatorEpic {
         epic.setProject(project);
         epic = epicRepository.save(epic);
 
-        int numberSprints = FakerUtil.getInstance().faker.number().numberBetween(2, config.getMaxNumberSprintsByEpic());
-
         //Save Sprints
         epic.setSprints(new ArrayList<>());
         Epic finalEpic = epic;
-        IntStream.range(0, numberSprints).forEach(e-> {
+        IntStream.range(0, config.getNumberSprintsByEpic()).forEach(e-> {
             finalEpic.getSprints().add(populatorSprint.save(finalEpic));
         });
 

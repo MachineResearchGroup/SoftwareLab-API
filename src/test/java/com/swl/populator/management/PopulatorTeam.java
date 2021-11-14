@@ -41,9 +41,6 @@ public class PopulatorTeam {
         Integer idOrg = organization.getId();
         Team team = create();
 
-        int numberCollaborators = FakerUtil.getInstance().faker.number().numberBetween(2, config.getMaxNumberCollaboratorsByTeam());
-        int numberProjects = FakerUtil.getInstance().faker.number().numberBetween(2, config.getMaxNumberProjectsByTeam());
-
         // Save PMO and PO
         Collaborator pmo = populatorCollaborator.savePMO(idOrg, organization.getSupervisor());
         team.setSupervisor(pmo);
@@ -54,12 +51,12 @@ public class PopulatorTeam {
 
         // Save DEVs
         Team finalTeam = team;
-        IntStream.range(0, numberCollaborators).forEach(i ->
+        IntStream.range(0, config.getNumberCollaboratorsByTeam()).forEach(i ->
                 populatorOrganizationTeam.save(organization, populatorCollaborator.saveDEV(idOrg, pmo), finalTeam));
 
         // Save Projects
         finalTeam.setProjects(new ArrayList<>());
-        IntStream.range(0, numberProjects).forEach(i -> finalTeam.getProjects().add(populatorProject.save(config, finalTeam)));
+        IntStream.range(0, config.getNumberProjectsByTeam()).forEach(i -> finalTeam.getProjects().add(populatorProject.save(config, finalTeam)));
         teamRepository.save(finalTeam);
     }
 
