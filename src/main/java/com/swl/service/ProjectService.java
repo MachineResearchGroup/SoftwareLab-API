@@ -1,12 +1,13 @@
 package com.swl.service;
 
-import com.swl.models.user.Client;
-import com.swl.models.project.Project;
-import com.swl.models.management.Team;
 import com.swl.models.enums.MessageEnum;
+import com.swl.models.management.Team;
+import com.swl.models.project.Project;
+import com.swl.models.user.Client;
 import com.swl.payload.request.ProjectRequest;
 import com.swl.payload.response.MessageResponse;
 import com.swl.repository.ClientRepository;
+import com.swl.repository.CollaboratorRepository;
 import com.swl.repository.ProjectRepository;
 import com.swl.repository.TeamRepository;
 import com.swl.util.ModelUtil;
@@ -36,10 +37,13 @@ public class ProjectService {
     private final ClientRepository clientRepository;
 
     @Autowired
+    private final CollaboratorRepository collaboratorRepository;
+
+    @Autowired
     private final TeamService teamService;
 
 
-    public ResponseEntity<?> verifyProject(ProjectRequest projectRequest){
+    public ResponseEntity<?> verifyProject(ProjectRequest projectRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
         Project project = new Project();
 
@@ -135,16 +139,40 @@ public class ProjectService {
     }
 
 
-    public List<Project> getAllProjectsByTeam(Integer idTeam){
+    public List<Project> getAllProjectsByClient(Integer idClient) {
+        if (clientRepository.existsById(idClient)) {
+            return repository.findAllByClientId(idClient).orElseGet(ArrayList::new);
+        }
+        return null;
+    }
+
+
+    public List<Project> getAllProjectsByCollaborator(Integer idCollaborator) {
+        if (collaboratorRepository.existsById(idCollaborator)) {
+            Optional<List<Team>> teams = teamRepository.findAllByCollaboratorId(idCollaborator);
+            List<Project> projects = new ArrayList<>();
+
+            teams.ifPresent(teamList -> teamList.forEach(t -> {
+                if(teamRepository.existsById(t.getId()))
+                    projects.addAll(getAllProjectsByTeam(t.getId()));
+            }));
+
+            return projects;
+        }
+        return null;
+    }
+
+
+    public List<Project> getAllProjectsByTeam(Integer idTeam) {
         return teamRepository.findById(idTeam)
                 .map(Team::getProjects)
                 .orElse(null);
     }
 
 
-    public List<Project> getAllProjectsByOrganization(Integer idOrganization){
+    public List<Project> getAllProjectsByOrganization(Integer idOrganization) {
         List<Team> teams = teamService.getAllTeamByOrganization(idOrganization);
-        if(!Objects.isNull(teams) && !teams.isEmpty()) {
+        if (!Objects.isNull(teams) && !teams.isEmpty()) {
             List<Project> projects = new ArrayList<>();
             teams.stream().filter(t -> !t.getProjects().isEmpty()).forEach(t -> projects.addAll(t.getProjects()));
 

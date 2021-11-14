@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.*;
@@ -34,6 +35,9 @@ public class ProjectServiceTest {
     private ClientRepository clientRepository;
 
     @Mock
+    private CollaboratorRepository collaboratorRepository;
+
+    @Mock
     private TeamService teamService;
 
     private ProjectService service;
@@ -41,7 +45,7 @@ public class ProjectServiceTest {
 
     @BeforeEach
     public void initUseCase() {
-        service = new ProjectService(repository, teamRepository, clientRepository, teamService);
+        service = new ProjectService(repository, teamRepository, clientRepository, collaboratorRepository, teamService);
     }
 
 

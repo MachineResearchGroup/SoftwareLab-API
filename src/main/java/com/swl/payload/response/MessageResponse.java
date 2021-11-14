@@ -13,6 +13,9 @@ public class MessageResponse {
 
 	private Object object;
 
+	public MessageResponse(MessageEnum messageEnum){
+		this.message = messageEnum.getMessage();
+	}
 
 	public MessageResponse(MessageEnum messageEnum, Class<?> typeClass){
 		this.message = String.format(messageEnum.getMessage(), typeClass.getSimpleName());

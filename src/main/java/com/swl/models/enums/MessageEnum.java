@@ -15,7 +15,8 @@ public enum MessageEnum {
     NOT_ADDED("%s have not been added"),
     INVALID("Invalid field: %s"),
     VALID("Valid fields: %s"),
-    ALREADY_EXISTS("%s already exists");
+    ALREADY_EXISTS("%s already exists"),
+    INVALID_REQUEST("Invalid request!");
 
     String message;
 
