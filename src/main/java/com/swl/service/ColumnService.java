@@ -16,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -56,9 +58,17 @@ public class ColumnService {
         if (board.isPresent()) {
             Columns columns = Columns.builder()
                     .title(columnRequest.getTitle())
+                    .board(board.get())
                     .build();
 
-            return repository.save(columns);
+            columns = repository.save(columns);
+
+            if(Objects.isNull(board.get().getColumns()))
+                board.get().setColumns(new ArrayList<>());
+            board.get().getColumns().add(columns);
+
+            boardRepository.save(board.get());
+            return columns;
         } else {
             return null;
         }

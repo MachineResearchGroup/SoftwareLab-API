@@ -6,14 +6,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 
 @Repository
 public interface OrganizationRepository extends JpaRepository<Organization, Integer> {
 
-    @Query("select oe.organization from OrganizationTeam oe where oe.team.id =:idEquipe")
-    Optional<Organization> findOrganizacaoByEquipeId(@Param("idEquipe") Integer idEquipe);
+    @Query("select oe.organization from OrganizationTeam oe where oe.team.id =:idTeam")
+    Optional<Organization> findOrganizationByEquipeId(@Param("idTeam") Integer idTeam);
 
     Optional<Organization> findOrganizationByCnpj(@Param("cnpj") String cnpj);
+
+    @Query("select oe.organization from OrganizationTeam oe where oe.collaborator.id =:idCollaborator")
+    Optional<List<Organization>> findOrganizationByCollaboratorId(@Param("idCollaborator") Integer idCollaborator);
 }

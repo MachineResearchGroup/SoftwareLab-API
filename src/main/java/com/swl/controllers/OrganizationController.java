@@ -17,13 +17,36 @@ import java.util.List;
 import java.util.Objects;
 
 
-@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/organization")
 @RequiredArgsConstructor
+@RequestMapping("/organization")
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class OrganizationController {
 
     private final OrganizationService service;
+
+
+    @ApiRoleAccessNotes
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/")
+    @Secured("ROLE_PMO")
+    public ResponseEntity<?> getAllOrganizations() {
+
+        try {
+            List<Organization> organizations = service.getAllOrganizations();
+
+            if (!Objects.isNull(organizations)) {
+                return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, organizations));
+            } else {
+                return ResponseEntity.badRequest().body(new MessageResponse(MessageEnum.NOT_FOUND, Organization.class));
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse(MessageEnum.NOT_FOUND, Organization.class, e.getMessage()));
+        }
+    }
 
 
     @ApiRoleAccessNotes

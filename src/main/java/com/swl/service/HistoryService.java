@@ -64,8 +64,16 @@ public class HistoryService {
         if (column.isPresent()) {
             History history = new History();
             modelUtil.map(historyRequest, history);
+            history.setColumn(column.get());
 
-            return repository.save(history);
+            history = repository.save(history);
+
+            if(Objects.isNull(column.get().getHistories()))
+                column.get().setHistories(new ArrayList<>());
+            column.get().getHistories().add(history);
+
+            columnRepository.save(column.get());
+            return history;
         } else {
             return null;
         }

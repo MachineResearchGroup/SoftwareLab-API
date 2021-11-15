@@ -151,7 +151,7 @@ public class TeamService {
         Optional<Team> teamOptional = repository.findById(idTeam);
 
         if (teamOptional.isPresent()) {
-            Optional<Organization> orgOptional = organizationRepository.findOrganizacaoByEquipeId(teamOptional.get().getId());
+            Optional<Organization> orgOptional = organizationRepository.findOrganizationByEquipeId(teamOptional.get().getId());
 
             if (orgOptional.isPresent()) {
                 List<Optional<Collaborator>> userList = emails.stream()

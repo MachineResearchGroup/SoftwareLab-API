@@ -205,7 +205,7 @@ public class TeamServiceTest {
 
         Mockito.when(repository.findById(1)).thenReturn(Optional.of(team));
 
-        Mockito.when(organizationRepository.findOrganizacaoByEquipeId(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
+        Mockito.when(organizationRepository.findOrganizationByEquipeId(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
 
         Mockito.when(collaboratorRepository.findCollaboratorByUserEmail(email))
                 .thenReturn(Optional.of(Mockito.mock(Collaborator.class)));

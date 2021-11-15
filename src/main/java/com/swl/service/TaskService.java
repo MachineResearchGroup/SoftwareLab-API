@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -50,13 +52,21 @@ public class TaskService {
 
     public Task registerTask(TaskRequest taskRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
-        Optional<Columns> project = columnRepository.findById(taskRequest.getIdColumn());
+        Optional<Columns> column = columnRepository.findById(taskRequest.getIdColumn());
 
-        if (project.isPresent()) {
+        if (column.isPresent()) {
             Task task = new Task();
             modelUtil.map(taskRequest, task);
+            task.setColumn(column.get());
 
-            return repository.save(task);
+            task = repository.save(task);
+
+            if(Objects.isNull(column.get().getTasks()))
+                column.get().setTasks(new ArrayList<>());
+            column.get().getTasks().add(task);
+
+            columnRepository.save(column.get());
+            return task;
         } else {
             return null;
         }

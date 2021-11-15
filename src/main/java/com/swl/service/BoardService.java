@@ -61,9 +61,16 @@ public class BoardService {
         if (project.isPresent()) {
             Board board = Board.builder()
                     .title(boardRequest.getTitle())
+                    .project(project.get())
                     .build();
+            board = repository.save(board);
 
-            return repository.save(board);
+            if(Objects.isNull(project.get().getBoards()))
+                project.get().setBoards(new ArrayList<>());
+            project.get().getBoards().add(board);
+
+            projectRepository.save(project.get());
+            return board;
         } else {
             return null;
         }

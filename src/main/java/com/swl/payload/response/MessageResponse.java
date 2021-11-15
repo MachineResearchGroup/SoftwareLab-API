@@ -31,6 +31,11 @@ public class MessageResponse {
 		this.object = object;
 	}
 
+	public MessageResponse(MessageEnum messageEnum, Class<?> typeClass, Object object){
+		this.message = String.format(messageEnum.getMessage(), typeClass.getSimpleName());
+		this.object = object;
+	}
+
 	public MessageResponse(MessageEnum messageEnum, Class<?> typeClass, String error){
 		this.message = String.format(messageEnum.getMessage(), typeClass.getSimpleName()) + ": "+ error;
 	}

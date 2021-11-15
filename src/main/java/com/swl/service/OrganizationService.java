@@ -119,6 +119,16 @@ public class OrganizationService {
     }
 
 
+    public List<Organization> getAllOrganizations() {
+        if (userService.getCurrentUser().isPresent() && userService.getCurrentUser().get() instanceof Collaborator) {
+            Optional<List<Organization>> organizations = repository.findOrganizationByCollaboratorId((
+                    (Collaborator) userService.getCurrentUser().get()).getId());
+            return organizations.get();
+        }
+        return null;
+    }
+
+
     public Organization getOrganization(Integer idOrg) {
         return repository.findById(idOrg).orElse(null);
     }
