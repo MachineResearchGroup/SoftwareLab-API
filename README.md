@@ -35,7 +35,7 @@ $ maven install
    
    a. Abrir no terminal a pasta em que se encontra o docker-compose:
     ```sh
-    cd /api-softwarelab/docker
+    cd /SoftwareLab-API/docker
     ```
    b. Rodar o comando:
    ```sh
