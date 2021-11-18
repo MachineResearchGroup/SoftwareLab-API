@@ -4,6 +4,7 @@ import com.swl.models.enums.MessageEnum;
 import com.swl.models.management.Team;
 import com.swl.models.project.Project;
 import com.swl.models.user.Client;
+import com.swl.models.user.Collaborator;
 import com.swl.payload.request.ProjectRequest;
 import com.swl.payload.response.MessageResponse;
 import com.swl.repository.ClientRepository;
@@ -41,6 +42,9 @@ public class ProjectService {
 
     @Autowired
     private final TeamService teamService;
+
+    @Autowired
+    private final UserService userService;
 
 
     public ResponseEntity<?> verifyProject(ProjectRequest projectRequest) {
@@ -158,6 +162,14 @@ public class ProjectService {
             }));
 
             return projects;
+        }
+        return null;
+    }
+
+
+    public List<Project> getAllProjectsByCollaboratorActual() {
+        if (userService.getCurrentUser().isPresent() && userService.getCurrentUser().get() instanceof Collaborator) {
+            return getAllProjectsByCollaborator(((Collaborator) userService.getCurrentUser().get()).getId());
         }
         return null;
     }

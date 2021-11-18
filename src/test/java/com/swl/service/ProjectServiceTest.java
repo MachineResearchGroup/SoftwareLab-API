@@ -40,12 +40,15 @@ public class ProjectServiceTest {
     @Mock
     private TeamService teamService;
 
+    @Mock
+    private UserService userService;
+
     private ProjectService service;
 
 
     @BeforeEach
     public void initUseCase() {
-        service = new ProjectService(repository, teamRepository, clientRepository, collaboratorRepository, teamService);
+        service = new ProjectService(repository, teamRepository, clientRepository, collaboratorRepository, teamService, userService);
     }
 
 

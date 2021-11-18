@@ -30,10 +30,10 @@ public class OrganizationController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/")
     @Secured("ROLE_PMO")
-    public ResponseEntity<?> getAllOrganizations() {
+    public ResponseEntity<?> getOrganizationsByCollaborator() {
 
         try {
-            List<Organization> organizations = service.getAllOrganizations();
+            List<Organization> organizations = service.getOrganizationsByCollaborator();
 
             if (!Objects.isNull(organizations)) {
                 return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, organizations));

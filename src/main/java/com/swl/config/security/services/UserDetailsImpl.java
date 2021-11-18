@@ -18,6 +18,8 @@ public class UserDetailsImpl implements UserDetails {
 
     private Integer id;
 
+    private String name;
+
     private String username;
 
     private String email;
@@ -28,9 +30,10 @@ public class UserDetailsImpl implements UserDetails {
     private Collection<? extends GrantedAuthority> authorities;
 
 
-    public UserDetailsImpl(Integer id, String username, String email, String password,
+    public UserDetailsImpl(Integer id, String name, String username, String email, String password,
                            Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
+        this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;
@@ -46,6 +49,7 @@ public class UserDetailsImpl implements UserDetails {
             authorities.add(new SimpleGrantedAuthority(((Collaborator) usuario).getFunction()));
             return new UserDetailsImpl(
                     ((Collaborator) usuario).getId(),
+                    ((Collaborator) usuario).getUser().getName(),
                     ((Collaborator) usuario).getUser().getUsername(),
                     ((Collaborator) usuario).getUser().getEmail(),
                     ((Collaborator) usuario).getUser().getPassword(),
@@ -55,6 +59,7 @@ public class UserDetailsImpl implements UserDetails {
 
             return new UserDetailsImpl(
                     ((Client) usuario).getId(),
+                    ((Client) usuario).getUser().getName(),
                     ((Client) usuario).getUser().getUsername(),
                     ((Client) usuario).getUser().getEmail(),
                     ((Client) usuario).getUser().getPassword(),
@@ -62,6 +67,7 @@ public class UserDetailsImpl implements UserDetails {
         } else if (usuario instanceof User){
             return new UserDetailsImpl(
                     ((User) usuario).getId(),
+                    ((User) usuario).getName(),
                     ((User) usuario).getUsername(),
                     ((User) usuario).getEmail(),
                     ((User) usuario).getPassword(),
@@ -81,6 +87,10 @@ public class UserDetailsImpl implements UserDetails {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getName() {
+        return name;
     }
 
     @Override

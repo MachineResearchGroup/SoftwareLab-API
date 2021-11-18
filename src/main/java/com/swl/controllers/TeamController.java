@@ -208,4 +208,27 @@ public class TeamController {
                     .body(new MessageResponse(MessageEnum.NOT_FOUND, Team.class, e.getMessage()));
         }
     }
+
+
+    @ApiRoleAccessNotes
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/")
+    @Secured({"ROLE_DEV", "ROLE_PO", "ROLE_PMO"})
+    public ResponseEntity<?> getTeamsByCollaborator() {
+
+        try {
+            List<Team> teams = service.getTeamsByCollaborator();
+
+            if (!Objects.isNull(teams)) {
+                return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, teams));
+            } else {
+                return ResponseEntity.badRequest().body(new MessageResponse(MessageEnum.NOT_FOUND, Team.class));
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse(MessageEnum.NOT_FOUND, Team.class, e.getMessage()));
+        }
+    }
 }

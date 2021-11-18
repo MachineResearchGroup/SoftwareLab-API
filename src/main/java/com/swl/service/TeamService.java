@@ -1,16 +1,16 @@
 package com.swl.service;
 
-import com.swl.models.user.Collaborator;
-import com.swl.models.management.Team;
+import com.swl.models.enums.MessageEnum;
 import com.swl.models.management.Organization;
 import com.swl.models.management.OrganizationTeam;
-import com.swl.models.enums.MessageEnum;
+import com.swl.models.management.Team;
+import com.swl.models.user.Collaborator;
 import com.swl.payload.request.TeamRequest;
 import com.swl.payload.response.MessageResponse;
 import com.swl.repository.CollaboratorRepository;
-import com.swl.repository.TeamRepository;
-import com.swl.repository.OrganizationTeamRepository;
 import com.swl.repository.OrganizationRepository;
+import com.swl.repository.OrganizationTeamRepository;
+import com.swl.repository.TeamRepository;
 import com.swl.util.ModelUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +40,11 @@ public class TeamService {
     @Autowired
     private final OrganizationTeamRepository organizationTeamRepository;
 
+    @Autowired
+    private final UserService userService;
 
-    public ResponseEntity<?> verifyTeam(TeamRequest teamRequest){
+
+    public ResponseEntity<?> verifyTeam(TeamRequest teamRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
         Team team = new Team();
 
@@ -53,7 +56,7 @@ public class TeamService {
             messageResponses.add(new MessageResponse(MessageEnum.NOT_FOUND, Collaborator.class));
         }
 
-        if(organizationRepository.findById(teamRequest.getIdOrganization()).isEmpty()){
+        if (organizationRepository.findById(teamRequest.getIdOrganization()).isEmpty()) {
             messageResponses.add(new MessageResponse(MessageEnum.NOT_FOUND, Organization.class));
         }
 
@@ -78,7 +81,7 @@ public class TeamService {
                             .name(teamRequest.getName())
                             .supervisor(colaborador.get())
                             .build();
-                } else{
+                } else {
                     return null;
                 }
                 team = repository.save(team);
@@ -90,7 +93,7 @@ public class TeamService {
                         .build();
 
                 organizationTeamRepository.save(organizationTeam);
-            }else {
+            } else {
                 team = Team.builder()
                         .name(teamRequest.getName())
                         .build();
@@ -117,7 +120,7 @@ public class TeamService {
 
         if (teamAux.isPresent()) {
             teamAux.get().setName(teamRequest.getName());
-            if(!Objects.isNull(teamRequest.getSupervisorEmail())) {
+            if (!Objects.isNull(teamRequest.getSupervisorEmail())) {
                 Optional<Collaborator> colaborador = collaboratorRepository
                         .findCollaboratorByUserEmail(teamRequest.getSupervisorEmail());
                 colaborador.ifPresent(value -> teamAux.get().setSupervisor(value));
@@ -151,7 +154,7 @@ public class TeamService {
         Optional<Team> teamOptional = repository.findById(idTeam);
 
         if (teamOptional.isPresent()) {
-            Optional<Organization> orgOptional = organizationRepository.findOrganizationByEquipeId(teamOptional.get().getId());
+            Optional<Organization> orgOptional = organizationRepository.findOrganizationByTeamId(teamOptional.get().getId());
 
             if (orgOptional.isPresent()) {
                 List<Optional<Collaborator>> userList = emails.stream()
@@ -160,7 +163,7 @@ public class TeamService {
 
 
                 userList.stream().filter(Optional::isPresent).forEach(c -> {
-                    if(organizationTeamRepository.findByTeamIdAndCollaboratorId(idTeam, c.get().getId()).isEmpty()) {
+                    if (organizationTeamRepository.findByTeamIdAndCollaboratorId(idTeam, c.get().getId()).isEmpty()) {
                         OrganizationTeam organizationTeam = OrganizationTeam.builder()
                                 .organization(orgOptional.get())
                                 .team(teamOptional.get())
@@ -210,7 +213,7 @@ public class TeamService {
     }
 
 
-    public List<Team> getAllTeamByOrganization(Integer idOrganization){
+    public List<Team> getAllTeamByOrganization(Integer idOrganization) {
         Optional<Organization> organization = organizationRepository.findById(idOrganization);
 
         return organization.map(value -> repository.findAllByOrganizationId(idOrganization)
@@ -218,5 +221,14 @@ public class TeamService {
                 .orElse(null);
     }
 
+
+    public List<Team> getTeamsByCollaborator() {
+        if (userService.getCurrentUser().isPresent() && userService.getCurrentUser().get() instanceof Collaborator) {
+            Optional<List<Team>> organizations = repository.findAllByCollaboratorId(
+                    ((Collaborator) userService.getCurrentUser().get()).getId());
+            return organizations.get();
+        }
+        return null;
+    }
 
 }

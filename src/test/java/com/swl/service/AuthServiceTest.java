@@ -277,6 +277,7 @@ public class AuthServiceTest {
 
         Assertions.assertEquals(response.getBody(), new JwtResponse("abc123",
                 userDetails.getId(),
+                userDetails.getName(),
                 userDetails.getUsername(),
                 userDetails.getEmail(),
                 roles));

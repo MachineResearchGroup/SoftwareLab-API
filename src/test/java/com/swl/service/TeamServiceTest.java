@@ -43,12 +43,15 @@ public class TeamServiceTest {
     @Mock
     private OrganizationTeamRepository organizationTeamRepository;
 
+    @Mock
+    private UserService userService;
+
     private TeamService service;
 
 
     @BeforeEach
     public void initUseCase() {
-        service = new TeamService(repository, organizationRepository, collaboratorRepository, organizationTeamRepository);
+        service = new TeamService(repository, organizationRepository, collaboratorRepository, organizationTeamRepository, userService);
     }
 
 
@@ -205,7 +208,7 @@ public class TeamServiceTest {
 
         Mockito.when(repository.findById(1)).thenReturn(Optional.of(team));
 
-        Mockito.when(organizationRepository.findOrganizationByEquipeId(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
+        Mockito.when(organizationRepository.findOrganizationByTeamId(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
 
         Mockito.when(collaboratorRepository.findCollaboratorByUserEmail(email))
                 .thenReturn(Optional.of(Mockito.mock(Collaborator.class)));

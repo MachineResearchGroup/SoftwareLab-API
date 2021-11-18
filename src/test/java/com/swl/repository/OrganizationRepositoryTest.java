@@ -90,7 +90,7 @@ public class OrganizationRepositoryTest {
                 .build();
         organizationTeamRepository.save(organizationTeam);
 
-        Optional<Organization> organizacaoResponse = repository.findOrganizationByEquipeId(team.getId());
+        Optional<Organization> organizacaoResponse = repository.findOrganizationByTeamId(team.getId());
         Assertions.assertTrue(organizacaoResponse.isPresent());
     }
 

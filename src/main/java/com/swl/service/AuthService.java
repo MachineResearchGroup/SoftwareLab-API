@@ -2,11 +2,11 @@ package com.swl.service;
 
 import com.swl.config.security.jwt.JwtUtils;
 import com.swl.config.security.services.UserDetailsImpl;
+import com.swl.models.enums.FunctionEnum;
+import com.swl.models.enums.MessageEnum;
 import com.swl.models.user.Client;
 import com.swl.models.user.Collaborator;
 import com.swl.models.user.User;
-import com.swl.models.enums.FunctionEnum;
-import com.swl.models.enums.MessageEnum;
 import com.swl.payload.request.ClientRequest;
 import com.swl.payload.request.CollaboratorRequest;
 import com.swl.payload.request.LoginRequest;
@@ -73,6 +73,7 @@ public class AuthService {
 
         return ResponseEntity.ok(new JwtResponse(jwt,
                 userDetails.getId(),
+                userDetails.getName(),
                 userDetails.getUsername(),
                 userDetails.getEmail(),
                 roles));
@@ -118,15 +119,27 @@ public class AuthService {
 
     public ResponseEntity<?> registerCollaborator(CollaboratorRequest collaboratorRequest) {
         Optional<User> usuario = userRepository.findByEmail(collaboratorRequest.getEmail());
-
         if (usuario.isEmpty()) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse(MessageEnum.NOT_FOUND, "email"));
         }
 
+        Optional<Collaborator> collaboratorOptional = collaboratorRepository.findCollaboratorByUserId(usuario.get().getId());
+        if (collaboratorOptional.isPresent()) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse(MessageEnum.ALREADY_EXISTS, Collaborator.class));
+        }
+
+        Optional<Client> clientOptional = clientRepository.findClientByUserId(usuario.get().getId());
+        if (clientOptional.isPresent()) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse(MessageEnum.ALREADY_EXISTS, Client.class));
+        }
+
         // Create new collaborator account
-        //TODO: permitir ter mais de uma instancia de colaborador? se sim, como controlar
         if (FunctionEnum.exists(collaboratorRequest.getFunction())) {
 
             Collaborator collaborator = new Collaborator(collaboratorRequest.getRegister(), collaboratorRequest.getFunction());
@@ -145,11 +158,24 @@ public class AuthService {
 
     public ResponseEntity<?> registerClient(ClientRequest clientRequest) {
         Optional<User> usuario = userRepository.findByEmail(clientRequest.getEmail());
-
         if (usuario.isEmpty()) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse(MessageEnum.NOT_FOUND, "email"));
+        }
+
+        Optional<Collaborator> collaboratorOptional = collaboratorRepository.findCollaboratorByUserId(usuario.get().getId());
+        if (collaboratorOptional.isPresent()) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse(MessageEnum.ALREADY_EXISTS, Collaborator.class));
+        }
+
+        Optional<Client> clientOptional = clientRepository.findClientByUserId(usuario.get().getId());
+        if (clientOptional.isPresent()) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse(MessageEnum.ALREADY_EXISTS, Client.class));
         }
 
         // Create new client account

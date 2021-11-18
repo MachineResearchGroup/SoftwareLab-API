@@ -178,11 +178,12 @@ public class ProjectController {
 
                 return !Objects.isNull(projects) ? ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, projects)) :
                         ResponseEntity.badRequest().body(new MessageResponse(MessageEnum.NOT_FOUND, Client.class));
-            }
+            } else {
+                projects = service.getAllProjectsByCollaboratorActual();
 
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.INVALID_REQUEST));
+                return !Objects.isNull(projects) ? ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, projects)) :
+                        ResponseEntity.badRequest().body(new MessageResponse(MessageEnum.NOT_FOUND, Client.class));
+            }
 
         } catch (Exception e) {
             return ResponseEntity
