@@ -1,20 +1,19 @@
 package com.swl.service;
 
-import com.swl.models.enums.MessageEnum;
+import com.swl.exceptions.business.EmptyException;
+import com.swl.exceptions.business.InvalidFieldException;
+import com.swl.exceptions.business.NotFoundException;
+import com.swl.models.management.Organization;
 import com.swl.models.management.Team;
+import com.swl.models.people.Client;
+import com.swl.models.people.Collaborator;
 import com.swl.models.project.Project;
-import com.swl.models.user.Client;
-import com.swl.models.user.Collaborator;
 import com.swl.payload.request.ProjectRequest;
-import com.swl.payload.response.MessageResponse;
-import com.swl.repository.ClientRepository;
-import com.swl.repository.CollaboratorRepository;
-import com.swl.repository.ProjectRepository;
-import com.swl.repository.TeamRepository;
+import com.swl.payload.response.ErrorResponse;
+import com.swl.repository.*;
 import com.swl.util.ModelUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -46,19 +45,24 @@ public class ProjectService {
     @Autowired
     private final UserService userService;
 
+    @Autowired
+    private final OrganizationRepository organizationRepository;
 
-    public ResponseEntity<?> verifyProject(ProjectRequest projectRequest) {
+
+    public void verifyProject(ProjectRequest projectRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
         Project project = new Project();
 
-        modelUtil.map(projectRequest, project);
-        List<MessageResponse> messageResponses = modelUtil.validate(project);
-
-        if (!messageResponses.isEmpty()) {
-            return ResponseEntity.badRequest().body(messageResponses);
+        if (teamRepository.findById(projectRequest.getIdTeam()).isEmpty()) {
+            throw new NotFoundException(Team.class);
         }
 
-        return ResponseEntity.ok(new MessageResponse(MessageEnum.VALID, Project.class));
+        modelUtil.map(projectRequest, project);
+        ErrorResponse error = modelUtil.validate(project);
+
+        if (!Objects.isNull(error)) {
+            throw new InvalidFieldException(error);
+        }
     }
 
 
@@ -81,65 +85,28 @@ public class ProjectService {
 
             return project;
         } else {
-            return null;
+            throw new NotFoundException(Team.class);
         }
     }
 
 
     public Project editProject(Integer idProject, ProjectRequest project) {
-        Optional<Project> projectAux = repository.findById(idProject);
+        Project projectAux = getProject(idProject);
+        projectAux.setName(project.getName());
+        projectAux.setDescription(project.getDescription());
+        projectAux.setRepository(project.getRepository());
 
-        if (projectAux.isPresent()) {
-            projectAux.get().setName(project.getName());
-            projectAux.get().setDescription(project.getDescription());
-            projectAux.get().setRepository(project.getRepository());
-
-            return repository.save(projectAux.get());
-        }
-
-        return null;
+        return repository.save(projectAux);
     }
 
 
     public Project getProject(Integer idProject) {
-        return repository.findById(idProject).orElse(null);
-    }
-
-
-    public boolean deleteProject(Integer idProjeto) {
-        if (repository.existsById(idProjeto)) {
-            repository.deleteById(idProjeto);
-            return true;
+        Optional<Project> project = repository.findById(idProject);
+        if (project.isPresent()) {
+            return project.get();
+        } else {
+            throw new NotFoundException(Project.class);
         }
-        return false;
-    }
-
-
-    public boolean addClientInProject(Integer idProjeto, String clientEmail) {
-        Optional<Project> projectOptional = repository.findById(idProjeto);
-        Optional<Client> clientOptional = clientRepository.findClientByUserEmail(clientEmail);
-
-        if (projectOptional.isPresent() && clientOptional.isPresent()) {
-            if (Objects.isNull(projectOptional.get().getClients())) {
-                projectOptional.get().setClients(new ArrayList<>());
-            }
-            AtomicBoolean clientExist = new AtomicBoolean(false);
-
-            projectOptional.get().getClients().forEach(c -> {
-                if (c.getId().equals(clientOptional.get().getId())) {
-                    clientExist.set(true);
-                }
-            });
-
-            if (!clientExist.get()) {
-                projectOptional.get().getClients().add(clientOptional.get());
-            }
-
-            repository.save(projectOptional.get());
-
-            return true;
-        }
-        return false;
     }
 
 
@@ -147,7 +114,7 @@ public class ProjectService {
         if (clientRepository.existsById(idClient)) {
             return repository.findAllByClientId(idClient).orElseGet(ArrayList::new);
         }
-        return null;
+        throw new NotFoundException(Client.class);
     }
 
 
@@ -157,13 +124,13 @@ public class ProjectService {
             List<Project> projects = new ArrayList<>();
 
             teams.ifPresent(teamList -> teamList.forEach(t -> {
-                if(teamRepository.existsById(t.getId()))
+                if (teamRepository.existsById(t.getId()))
                     projects.addAll(getAllProjectsByTeam(t.getId()));
             }));
 
             return projects;
         }
-        return null;
+        throw new NotFoundException(Collaborator.class);
     }
 
 
@@ -171,26 +138,65 @@ public class ProjectService {
         if (userService.getCurrentUser().isPresent() && userService.getCurrentUser().get() instanceof Collaborator) {
             return getAllProjectsByCollaborator(((Collaborator) userService.getCurrentUser().get()).getId());
         }
-        return null;
+        throw new NotFoundException(Collaborator.class);
     }
 
 
     public List<Project> getAllProjectsByTeam(Integer idTeam) {
-        return teamRepository.findById(idTeam)
-                .map(Team::getProjects)
-                .orElse(null);
+        Optional<Team> team = teamRepository.findById(idTeam);
+        if (team.isPresent()) {
+            List<Project> projects = team.get().getProjects();
+            return !Objects.isNull(projects) ? projects : new ArrayList<>();
+        } else {
+            throw new NotFoundException(Team.class);
+        }
     }
 
 
     public List<Project> getAllProjectsByOrganization(Integer idOrganization) {
-        List<Team> teams = teamService.getAllTeamByOrganization(idOrganization);
-        if (!Objects.isNull(teams) && !teams.isEmpty()) {
-            List<Project> projects = new ArrayList<>();
-            teams.stream().filter(t -> !t.getProjects().isEmpty()).forEach(t -> projects.addAll(t.getProjects()));
+        Optional<Organization> organization = organizationRepository.findById(idOrganization);
 
-            return projects;
+        if (organization.isPresent()) {
+            List<Team> teams = teamService.getAllTeamByOrganization(idOrganization);
+            if (!Objects.isNull(teams) && !teams.isEmpty()) {
+                List<Project> projects = new ArrayList<>();
+                teams.stream().filter(t -> !t.getProjects().isEmpty()).forEach(t -> projects.addAll(t.getProjects()));
+                return projects;
+            }
+            throw new EmptyException(Team.class);
         }
-        return null;
+        throw new NotFoundException(Organization.class);
+    }
+
+
+    public void deleteProject(Integer idProject) {
+        Project project = getProject(idProject);
+        repository.deleteById(project.getId());
+    }
+
+
+    public void addClientInProject(Integer idProjeto, String clientEmail) {
+        Project project = getProject(idProjeto);
+        Optional<Client> clientOptional = clientRepository.findClientByUserEmail(clientEmail);
+
+        if (clientOptional.isPresent()) {
+            if (Objects.isNull(project.getClients())) {
+                project.setClients(new ArrayList<>());
+            }
+            AtomicBoolean clientExist = new AtomicBoolean(false);
+
+            project.getClients().forEach(c -> {
+                if (c.getId().equals(clientOptional.get().getId())) {
+                    clientExist.set(true);
+                }
+            });
+
+            if (!clientExist.get()) {
+                project.getClients().add(clientOptional.get());
+            }
+            repository.save(project);
+        }
+        throw new NotFoundException(Client.class);
     }
 
 }

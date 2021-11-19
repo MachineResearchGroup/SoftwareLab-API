@@ -1,11 +1,10 @@
 package com.swl.models.project;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.swl.models.user.Client;
+import com.swl.models.people.Client;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
 

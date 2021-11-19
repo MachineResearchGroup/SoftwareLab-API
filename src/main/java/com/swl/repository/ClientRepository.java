@@ -1,6 +1,6 @@
 package com.swl.repository;
 
-import com.swl.models.user.Client;
+import com.swl.models.people.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

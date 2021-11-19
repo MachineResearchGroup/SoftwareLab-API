@@ -1,15 +1,12 @@
 package com.swl.populator.project;
 
 import com.swl.models.project.Document;
-import com.swl.models.project.Epic;
 import com.swl.models.project.Event;
 import com.swl.models.project.Project;
-import com.swl.models.user.Client;
-import com.swl.models.user.Collaborator;
-import com.swl.populator.config.PopulatorConfig;
+import com.swl.models.people.Client;
+import com.swl.models.people.Collaborator;
 import com.swl.populator.util.FakerUtil;
 import com.swl.repository.ClientRepository;
-import com.swl.repository.EpicRepository;
 import com.swl.repository.EventRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,14 +14,10 @@ import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.IntStream;
 
 @Component
 @AllArgsConstructor

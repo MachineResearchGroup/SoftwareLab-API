@@ -2,11 +2,13 @@ package com.swl.service;
 
 import com.swl.config.security.jwt.JwtUtils;
 import com.swl.config.security.services.UserDetailsImpl;
+import com.swl.exceptions.business.AlreadyExistsException;
+import com.swl.exceptions.business.NotFoundException;
 import com.swl.models.enums.FunctionEnum;
 import com.swl.models.enums.MessageEnum;
-import com.swl.models.user.Client;
-import com.swl.models.user.Collaborator;
-import com.swl.models.user.User;
+import com.swl.models.people.Client;
+import com.swl.models.people.Collaborator;
+import com.swl.models.people.User;
 import com.swl.payload.request.ClientRequest;
 import com.swl.payload.request.CollaboratorRequest;
 import com.swl.payload.request.LoginRequest;
@@ -82,15 +84,11 @@ public class AuthService {
 
     public ResponseEntity<?> registerUser(RegisterRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.ALREADY_USED, "username"));
+            throw new AlreadyExistsException("username");
         }
 
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.ALREADY_USED, "email"));
+            throw new AlreadyExistsException("email");
         }
 
         // Create new user's account
@@ -120,23 +118,15 @@ public class AuthService {
     public ResponseEntity<?> registerCollaborator(CollaboratorRequest collaboratorRequest) {
         Optional<User> usuario = userRepository.findByEmail(collaboratorRequest.getEmail());
         if (usuario.isEmpty()) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.NOT_FOUND, "email"));
+            throw new NotFoundException("email");
         }
 
-        Optional<Collaborator> collaboratorOptional = collaboratorRepository.findCollaboratorByUserId(usuario.get().getId());
-        if (collaboratorOptional.isPresent()) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.ALREADY_EXISTS, Collaborator.class));
+        if (collaboratorRepository.findCollaboratorByUserId(usuario.get().getId()).isPresent()) {
+            throw new AlreadyExistsException(Collaborator.class);
         }
 
-        Optional<Client> clientOptional = clientRepository.findClientByUserId(usuario.get().getId());
-        if (clientOptional.isPresent()) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.ALREADY_EXISTS, Client.class));
+        if (clientRepository.findClientByUserId(usuario.get().getId()).isPresent()) {
+            throw new AlreadyExistsException(Client.class);
         }
 
         // Create new collaborator account
@@ -149,9 +139,7 @@ public class AuthService {
 
             return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, Collaborator.class));
         } else {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.NOT_FOUND, "function"));
+            throw new NotFoundException("function");
         }
     }
 
@@ -159,23 +147,15 @@ public class AuthService {
     public ResponseEntity<?> registerClient(ClientRequest clientRequest) {
         Optional<User> usuario = userRepository.findByEmail(clientRequest.getEmail());
         if (usuario.isEmpty()) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.NOT_FOUND, "email"));
+            throw new NotFoundException("email");
         }
 
-        Optional<Collaborator> collaboratorOptional = collaboratorRepository.findCollaboratorByUserId(usuario.get().getId());
-        if (collaboratorOptional.isPresent()) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.ALREADY_EXISTS, Collaborator.class));
+        if (collaboratorRepository.findCollaboratorByUserId(usuario.get().getId()).isPresent()) {
+            throw new AlreadyExistsException(Collaborator.class);
         }
 
-        Optional<Client> clientOptional = clientRepository.findClientByUserId(usuario.get().getId());
-        if (clientOptional.isPresent()) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.ALREADY_EXISTS, Client.class));
+        if (clientRepository.findClientByUserId(usuario.get().getId()).isPresent()) {
+            throw new AlreadyExistsException(Client.class);
         }
 
         // Create new client account

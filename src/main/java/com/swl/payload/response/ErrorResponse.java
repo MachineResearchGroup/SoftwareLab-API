@@ -1,20 +1,21 @@
 package com.swl.payload.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
-import java.time.LocalDate;
-import java.util.List;
 
 
 @Data
 @Builder
+@AllArgsConstructor
 public class ErrorResponse {
 
-    private LocalDate timestamp;
+    private String key;
 
-    private String status;
+    private String error;
 
-    private List<String> errors;
+    public ErrorResponse(String error) {
+        this.error = error;
+    }
 
 }

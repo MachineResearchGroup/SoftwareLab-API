@@ -1,6 +1,6 @@
 package com.swl.models.management;
 
-import com.swl.models.user.Collaborator;
+import com.swl.models.people.Collaborator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

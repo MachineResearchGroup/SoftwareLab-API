@@ -1,7 +1,6 @@
 package com.swl.util;
 
-import com.swl.models.enums.MessageEnum;
-import com.swl.payload.response.MessageResponse;
+import com.swl.payload.response.ErrorResponse;
 import org.modelmapper.ModelMapper;
 
 import javax.validation.Validation;
@@ -30,10 +29,12 @@ public final class ModelUtil {
     }
 
 
-    public List<MessageResponse> validate(Object obj) {
-        return validator.validate(obj).stream()
-                .map(r -> new MessageResponse(MessageEnum.INVALID, r.getMessage()))
+    public ErrorResponse validate(Object obj) {
+        List<ErrorResponse> errors = validator.validate(obj).stream()
+                .map(r -> new ErrorResponse(r.getPropertyPath().toString(), r.getMessage()))
                 .collect(Collectors.toList());
+        if(!errors.isEmpty()) return errors.get(0);
+        else return null;
     }
 
 }

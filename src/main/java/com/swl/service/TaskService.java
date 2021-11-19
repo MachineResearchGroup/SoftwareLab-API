@@ -1,9 +1,13 @@
 package com.swl.service;
 
+import com.swl.exceptions.business.InvalidFieldException;
+import com.swl.exceptions.business.NotFoundException;
 import com.swl.models.enums.MessageEnum;
+import com.swl.models.project.Board;
 import com.swl.models.project.Columns;
 import com.swl.models.project.Task;
 import com.swl.payload.request.TaskRequest;
+import com.swl.payload.response.ErrorResponse;
 import com.swl.payload.response.MessageResponse;
 import com.swl.repository.ColumnRepository;
 import com.swl.repository.TaskRepository;
@@ -31,22 +35,20 @@ public class TaskService {
     private final TaskRepository repository;
 
 
-    public ResponseEntity<?> verifyTask(TaskRequest taskRequest) {
+    public void verifyTask(TaskRequest taskRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
         Task task = new Task();
 
-        modelUtil.map(taskRequest, task);
-        List<MessageResponse> messageResponses = modelUtil.validate(task);
-
         if (columnRepository.findById(taskRequest.getIdColumn()).isEmpty()) {
-            messageResponses.add(new MessageResponse(MessageEnum.NOT_FOUND, Columns.class));
+            throw new NotFoundException(Columns.class);
         }
 
-        if (!messageResponses.isEmpty()) {
-            return ResponseEntity.badRequest().body(messageResponses);
-        }
+        modelUtil.map(taskRequest, task);
+        ErrorResponse error = modelUtil.validate(task);
 
-        return ResponseEntity.ok(new MessageResponse(MessageEnum.VALID, Task.class));
+        if (!Objects.isNull(error)) {
+            throw new InvalidFieldException(error);
+        }
     }
 
 
@@ -61,45 +63,47 @@ public class TaskService {
 
             task = repository.save(task);
 
-            if(Objects.isNull(column.get().getTasks()))
+            if (Objects.isNull(column.get().getTasks()))
                 column.get().setTasks(new ArrayList<>());
             column.get().getTasks().add(task);
 
             columnRepository.save(column.get());
             return task;
         } else {
-            return null;
+            throw new NotFoundException(Columns.class);
         }
     }
 
 
     public Task editTask(Integer idTask, TaskRequest taskRequest) {
-        Optional<Task> taskAux = repository.findById(idTask);
-
-        if (taskAux.isPresent()) {
-            CopyUtil.copyProperties(taskRequest, taskAux);
-            return repository.save(taskAux.get());
-        }
-        return null;
+        Task taskAux = getTask(idTask);
+        CopyUtil.copyProperties(taskRequest, taskAux);
+        return repository.save(taskAux);
     }
 
 
     public Task getTask(Integer idTask) {
-        return repository.findById(idTask).orElse(null);
+        Optional<Task> tasks = repository.findById(idTask);
+        if (tasks.isPresent()) {
+            return tasks.get();
+        } else {
+            throw new NotFoundException(Board.class);
+        }
     }
 
 
     public List<Task> getAllTaskByColumn(Integer idColumn) {
-        return repository.findAllByColumnId(idColumn).orElse(null);
+        Optional<Columns> columns = columnRepository.findById(idColumn);
+        if (columns.isPresent()) {
+            return repository.findAllByColumnId(idColumn).orElseGet(ArrayList::new);
+        }
+        throw new NotFoundException(Columns.class);
     }
 
 
-    public boolean deleteTask(Integer idTask) {
-        if (repository.existsById(idTask)) {
-            repository.deleteById(idTask);
-            return true;
-        }
-        return false;
+    public void deleteTask(Integer idTask) {
+        Task task = getTask(idTask);
+        repository.deleteById(task.getId());
     }
 
 

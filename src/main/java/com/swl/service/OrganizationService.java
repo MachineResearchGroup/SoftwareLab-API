@@ -1,22 +1,26 @@
 package com.swl.service;
 
-import com.swl.models.user.Collaborator;
+import com.swl.exceptions.business.AlreadyExistsException;
+import com.swl.exceptions.business.InvalidFieldException;
+import com.swl.exceptions.business.NotFoundException;
 import com.swl.models.management.Address;
 import com.swl.models.management.Organization;
 import com.swl.models.management.OrganizationTeam;
-import com.swl.models.enums.MessageEnum;
-import com.swl.util.ModelUtil;
+import com.swl.models.people.Collaborator;
+import com.swl.models.people.User;
 import com.swl.payload.request.OrganizationRequest;
+import com.swl.payload.response.ErrorResponse;
 import com.swl.payload.response.MessageResponse;
 import com.swl.repository.CollaboratorRepository;
-import com.swl.repository.OrganizationTeamRepository;
 import com.swl.repository.OrganizationRepository;
+import com.swl.repository.OrganizationTeamRepository;
 import com.swl.util.CopyUtil;
+import com.swl.util.ModelUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -39,22 +43,20 @@ public class OrganizationService {
     private final UserService userService;
 
 
-    public ResponseEntity<?> verifyOrganization(OrganizationRequest registerRequest){
+    public void verifyOrganization(OrganizationRequest registerRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
         Organization organization = new Organization();
 
+        if (repository.findOrganizationByCnpj(registerRequest.getCnpj()).isPresent()) {
+            throw new AlreadyExistsException("cnpj");
+        }
+
         modelUtil.map(registerRequest, organization);
-        List<MessageResponse> messageResponses = modelUtil.validate(organization);
+        ErrorResponse error = modelUtil.validate(organization);
 
-        if(repository.findOrganizationByCnpj(registerRequest.getCnpj()).isPresent()){
-            messageResponses.add(new MessageResponse(MessageEnum.ALREADY_EXISTS, "cnpj"));
+        if(!Objects.isNull(error)){
+            throw new InvalidFieldException(error);
         }
-
-        if (!messageResponses.isEmpty()) {
-            return ResponseEntity.badRequest().body(messageResponses);
-        }
-
-        return ResponseEntity.ok(new MessageResponse(MessageEnum.VALID, Organization.class));
     }
 
 
@@ -115,39 +117,40 @@ public class OrganizationService {
             return orgEdit;
         }
 
-        return null;
+        throw new NotFoundException(Organization.class);
     }
 
 
     public List<Organization> getOrganizationsByCollaborator() {
         if (userService.getCurrentUser().isPresent() && userService.getCurrentUser().get() instanceof Collaborator) {
-            Optional<List<Organization>> organizations = repository.findOrganizationByCollaboratorId((
-                    (Collaborator) userService.getCurrentUser().get()).getId());
-            return organizations.get();
+            return repository.findOrganizationByCollaboratorId(((Collaborator) userService.getCurrentUser().get()).getId()).get();
         }
-        return null;
+        throw new NotFoundException(((User) userService.getCurrentUser().get()).getEmail());
     }
 
 
     public Organization getOrganization(Integer idOrg) {
-        return repository.findById(idOrg).orElse(null);
+        Optional<Organization> organization = repository.findById(idOrg);
+        if (organization.isPresent()) {
+            return organization.get();
+        } else {
+            throw new NotFoundException(Organization.class);
+        }
     }
 
 
     public List<Collaborator> getCollaborators(Integer idOrg) {
-        return collaboratorRepository.findAllCollaboratorByOrganizationId(idOrg).orElse(null);
+        Organization organization = getOrganization(idOrg);
+        Optional<List<Collaborator>> collaborators = collaboratorRepository.findAllCollaboratorByOrganizationId(organization.getId());
+        return collaborators.orElseGet(ArrayList::new);
     }
 
 
-    public boolean deleteOrganization(Integer idOrg) {
-        if (repository.existsById(idOrg)) {
-            Optional<List<OrganizationTeam>> organizationTeamList = organizationTeamRepository.findAllByOrganizationId(idOrg);
-            organizationTeamList.ifPresent(organizationTeamRepository::deleteAll);
-
-            repository.deleteById(idOrg);
-            return true;
-        }
-        return false;
+    public void deleteOrganization(Integer idOrg) {
+        Organization organization = getOrganization(idOrg);
+        Optional<List<OrganizationTeam>> organizationTeamList = organizationTeamRepository.findAllByOrganizationId(organization.getId());
+        organizationTeamList.ifPresent(organizationTeamRepository::deleteAll);
+        repository.deleteById(idOrg);
     }
 
 }

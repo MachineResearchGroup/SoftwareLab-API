@@ -1,7 +1,7 @@
 package com.swl.models.project;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.swl.models.user.Collaborator;
+import com.swl.models.people.Collaborator;
 import lombok.*;
 
 import javax.persistence.*;

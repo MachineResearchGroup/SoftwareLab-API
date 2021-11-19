@@ -1,12 +1,15 @@
 package com.swl.service;
 
-import com.swl.models.enums.MessageEnum;
+import com.swl.exceptions.business.EmptyException;
+import com.swl.exceptions.business.InvalidFieldException;
+import com.swl.exceptions.business.NotFoundException;
 import com.swl.models.management.Organization;
 import com.swl.models.management.OrganizationTeam;
 import com.swl.models.management.Team;
-import com.swl.models.user.Collaborator;
+import com.swl.models.people.Collaborator;
+import com.swl.models.people.User;
 import com.swl.payload.request.TeamRequest;
-import com.swl.payload.response.MessageResponse;
+import com.swl.payload.response.ErrorResponse;
 import com.swl.repository.CollaboratorRepository;
 import com.swl.repository.OrganizationRepository;
 import com.swl.repository.OrganizationTeamRepository;
@@ -14,7 +17,6 @@ import com.swl.repository.TeamRepository;
 import com.swl.util.ModelUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -44,27 +46,25 @@ public class TeamService {
     private final UserService userService;
 
 
-    public ResponseEntity<?> verifyTeam(TeamRequest teamRequest) {
+    public void verifyTeam(TeamRequest teamRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
         Team team = new Team();
 
-        modelUtil.map(teamRequest, team);
-        List<MessageResponse> messageResponses = modelUtil.validate(team);
-
         if (!Objects.isNull(teamRequest.getSupervisorEmail()) &&
                 collaboratorRepository.findCollaboratorByUserEmail(teamRequest.getSupervisorEmail()).isEmpty()) {
-            messageResponses.add(new MessageResponse(MessageEnum.NOT_FOUND, Collaborator.class));
+            throw new NotFoundException(Collaborator.class);
         }
 
         if (organizationRepository.findById(teamRequest.getIdOrganization()).isEmpty()) {
-            messageResponses.add(new MessageResponse(MessageEnum.NOT_FOUND, Organization.class));
+            throw new NotFoundException(Organization.class);
         }
 
-        if (!messageResponses.isEmpty()) {
-            return ResponseEntity.badRequest().body(messageResponses);
-        }
+        modelUtil.map(teamRequest, team);
+        ErrorResponse error = modelUtil.validate(team);
 
-        return ResponseEntity.ok(new MessageResponse(MessageEnum.VALID, Team.class));
+        if(!Objects.isNull(error)){
+            throw new InvalidFieldException(error);
+        }
     }
 
 
@@ -74,22 +74,22 @@ public class TeamService {
         if (org.isPresent()) {
             Team team;
             if (!Objects.isNull(teamRequest.getSupervisorEmail())) {
-                Optional<Collaborator> colaborador = collaboratorRepository.findCollaboratorByUserEmail(teamRequest.getSupervisorEmail());
+                Optional<Collaborator> collaborator = collaboratorRepository.findCollaboratorByUserEmail(teamRequest.getSupervisorEmail());
 
-                if (colaborador.isPresent()) {
+                if (collaborator.isPresent()) {
                     team = Team.builder()
                             .name(teamRequest.getName())
-                            .supervisor(colaborador.get())
+                            .supervisor(collaborator.get())
                             .build();
                 } else {
-                    return null;
+                    throw new NotFoundException(Collaborator.class);
                 }
                 team = repository.save(team);
 
                 OrganizationTeam organizationTeam = OrganizationTeam.builder()
                         .organization(org.get())
                         .team(team)
-                        .collaborator(colaborador.get())
+                        .collaborator(collaborator.get())
                         .build();
 
                 organizationTeamRepository.save(organizationTeam);
@@ -110,7 +110,7 @@ public class TeamService {
             return team;
 
         } else {
-            return null;
+            throw new NotFoundException(Organization.class);
         }
     }
 
@@ -129,106 +129,107 @@ public class TeamService {
             return repository.save(teamAux.get());
         }
 
-        return null;
+        throw new NotFoundException(Team.class);
     }
 
 
     public Team getTeam(Integer idTeam) {
-        return repository.findById(idTeam).orElse(null);
-    }
-
-
-    public boolean deleteTeam(Integer idTeam) {
-        if (repository.existsById(idTeam)) {
-            Optional<List<OrganizationTeam>> optional = organizationTeamRepository.findAllByTeamId(idTeam);
-            optional.ifPresent(organizationTeamRepository::deleteAll);
-
-            repository.deleteById(idTeam);
-            return true;
+        Optional<Team> team = repository.findById(idTeam);
+        if (team.isPresent()) {
+            return team.get();
+        } else {
+            throw new NotFoundException(Team.class);
         }
-        return false;
-    }
-
-
-    public List<Collaborator> addCollaborator(Integer idTeam, List<String> emails) {
-        Optional<Team> teamOptional = repository.findById(idTeam);
-
-        if (teamOptional.isPresent()) {
-            Optional<Organization> orgOptional = organizationRepository.findOrganizationByTeamId(teamOptional.get().getId());
-
-            if (orgOptional.isPresent()) {
-                List<Optional<Collaborator>> userList = emails.stream()
-                        .map(collaboratorRepository::findCollaboratorByUserEmail)
-                        .collect(Collectors.toList());
-
-
-                userList.stream().filter(Optional::isPresent).forEach(c -> {
-                    if (organizationTeamRepository.findByTeamIdAndCollaboratorId(idTeam, c.get().getId()).isEmpty()) {
-                        OrganizationTeam organizationTeam = OrganizationTeam.builder()
-                                .organization(orgOptional.get())
-                                .team(teamOptional.get())
-                                .collaborator(c.get())
-                                .build();
-                        organizationTeamRepository.save(organizationTeam);
-                    }
-                });
-
-                Optional<List<Collaborator>> colaboradorList = collaboratorRepository.findAllCollaboratorByTeamId(teamOptional.get().getId());
-
-                return colaboradorList.orElseGet(ArrayList::new);
-            }
-        }
-        return null;
     }
 
 
     public List<Collaborator> getCollaborators(Integer idTeam) {
-        Optional<List<Collaborator>> collaboratorOptional = collaboratorRepository.findAllCollaboratorByTeamId(idTeam);
+        Team team = getTeam(idTeam);
+        Optional<List<Collaborator>> collaboratorOptional = collaboratorRepository.findAllCollaboratorByTeamId(team.getId());
         return collaboratorOptional.orElseGet(ArrayList::new);
-    }
-
-
-    public List<Collaborator> deleteCollaborator(Integer idTeam, List<String> emails) {
-        Optional<Team> teamOptional = repository.findById(idTeam);
-
-        if (teamOptional.isPresent()) {
-            Optional<List<Collaborator>> collaboratorList = collaboratorRepository.findAllCollaboratorByTeamId(idTeam);
-
-            if (collaboratorList.isPresent()) {
-                List<Collaborator> removeCollaborators = emails.stream().map(e -> collaboratorRepository
-                        .findCollaboratorByUserEmail(e).orElseGet(null))
-                        .collect(Collectors.toList());
-
-                removeCollaborators.forEach(c -> {
-                    Optional<OrganizationTeam> organizacaoEquipeOptional = organizationTeamRepository
-                            .findByTeamIdAndCollaboratorId(idTeam, c.getId());
-                    organizationTeamRepository.delete(organizacaoEquipeOptional.get());
-                });
-
-                return collaboratorRepository.findAllCollaboratorByTeamId(idTeam).orElseGet(ArrayList::new);
-            }
-        }
-
-        return null;
     }
 
 
     public List<Team> getAllTeamByOrganization(Integer idOrganization) {
         Optional<Organization> organization = organizationRepository.findById(idOrganization);
 
-        return organization.map(value -> repository.findAllByOrganizationId(idOrganization)
-                .orElseGet(ArrayList::new))
-                .orElse(null);
+        if (organization.isPresent()) {
+            Optional<List<Team>> teams = repository.findAllByOrganizationId(idOrganization);
+            return teams.orElseGet(ArrayList::new);
+        } else {
+            throw new NotFoundException(Organization.class);
+        }
     }
 
 
     public List<Team> getTeamsByCollaborator() {
         if (userService.getCurrentUser().isPresent() && userService.getCurrentUser().get() instanceof Collaborator) {
-            Optional<List<Team>> organizations = repository.findAllByCollaboratorId(
-                    ((Collaborator) userService.getCurrentUser().get()).getId());
-            return organizations.get();
+            Optional<List<Team>> teams = repository.findAllByCollaboratorId(((Collaborator) userService.getCurrentUser().get()).getId());
+            return teams.orElseGet(ArrayList::new);
         }
-        return null;
+        throw new NotFoundException(((User) userService.getCurrentUser().get()).getEmail());
+    }
+
+
+    public void deleteTeam(Integer idTeam) {
+        Team team = getTeam(idTeam);
+        Optional<List<OrganizationTeam>> optional = organizationTeamRepository.findAllByTeamId(team.getId());
+        optional.ifPresent(organizationTeamRepository::deleteAll);
+        repository.deleteById(idTeam);
+    }
+
+
+    public List<Collaborator> addCollaborator(Integer idTeam, List<String> emails) {
+        Team team = getTeam(idTeam);
+
+        Optional<Organization> orgOptional = organizationRepository.findOrganizationByTeamId(team.getId());
+
+        if (orgOptional.isPresent()) {
+            List<Optional<Collaborator>> userList = emails.stream()
+                    .map(collaboratorRepository::findCollaboratorByUserEmail)
+                    .collect(Collectors.toList());
+
+
+            userList.stream().filter(Optional::isPresent).forEach(c -> {
+                if (organizationTeamRepository.findByTeamIdAndCollaboratorId(idTeam, c.get().getId()).isEmpty()) {
+                    OrganizationTeam organizationTeam = OrganizationTeam.builder()
+                            .organization(orgOptional.get())
+                            .team(team)
+                            .collaborator(c.get())
+                            .build();
+                    organizationTeamRepository.save(organizationTeam);
+                }
+            });
+
+            Optional<List<Collaborator>> colaboradorList = collaboratorRepository.findAllCollaboratorByTeamId(team.getId());
+
+            return colaboradorList.orElseGet(ArrayList::new);
+        }
+
+        throw new NotFoundException(Organization.class);
+    }
+
+
+    public List<Collaborator> deleteCollaborators(Integer idTeam, List<String> emails) {
+        Team team = getTeam(idTeam);
+
+        Optional<List<Collaborator>> collaboratorList = collaboratorRepository.findAllCollaboratorByTeamId(team.getId());
+
+        if (collaboratorList.isPresent()) {
+            List<Collaborator> removeCollaborators = emails.stream().map(e -> collaboratorRepository
+                    .findCollaboratorByUserEmail(e).orElseGet(null))
+                    .collect(Collectors.toList());
+
+            removeCollaborators.forEach(c -> {
+                Optional<OrganizationTeam> organizacaoEquipeOptional = organizationTeamRepository
+                        .findByTeamIdAndCollaboratorId(idTeam, c.getId());
+                organizacaoEquipeOptional.ifPresent(organizationTeamRepository::delete);
+            });
+
+            return collaboratorRepository.findAllCollaboratorByTeamId(idTeam).orElseGet(ArrayList::new);
+        }else{
+            throw new EmptyException(Team.class);
+        }
     }
 
 }

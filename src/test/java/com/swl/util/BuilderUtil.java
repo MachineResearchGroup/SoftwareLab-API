@@ -4,9 +4,9 @@ import com.swl.models.management.Address;
 import com.swl.models.management.Organization;
 import com.swl.models.management.Team;
 import com.swl.models.project.Project;
-import com.swl.models.user.Client;
-import com.swl.models.user.Collaborator;
-import com.swl.models.user.User;
+import com.swl.models.people.Client;
+import com.swl.models.people.Collaborator;
+import com.swl.models.people.User;
 
 import java.util.ArrayList;
 import java.util.Collections;

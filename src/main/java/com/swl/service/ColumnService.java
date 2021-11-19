@@ -1,19 +1,16 @@
 package com.swl.service;
 
-import com.swl.models.enums.MessageEnum;
+import com.swl.exceptions.business.InvalidFieldException;
+import com.swl.exceptions.business.NotFoundException;
 import com.swl.models.project.Board;
 import com.swl.models.project.Columns;
-import com.swl.models.project.Project;
-import com.swl.payload.request.BoardRequest;
 import com.swl.payload.request.ColumnRequest;
-import com.swl.payload.response.MessageResponse;
+import com.swl.payload.response.ErrorResponse;
 import com.swl.repository.BoardRepository;
 import com.swl.repository.ColumnRepository;
-import com.swl.repository.ProjectRepository;
 import com.swl.util.ModelUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,22 +30,20 @@ public class ColumnService {
     private final ColumnRepository repository;
 
 
-    public ResponseEntity<?> verifyColumn(ColumnRequest boardRequest) {
+    public void verifyColumn(ColumnRequest columnRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
-        Board board = new Board();
+        Columns columns = new Columns();
 
-        modelUtil.map(boardRequest, board);
-        List<MessageResponse> messageResponses = modelUtil.validate(board);
-
-        if (boardRepository.findById(boardRequest.getIdBoard()).isEmpty()) {
-            messageResponses.add(new MessageResponse(MessageEnum.NOT_FOUND, Board.class));
+        if (boardRepository.findById(columnRequest.getIdBoard()).isEmpty()) {
+            throw new NotFoundException(Board.class);
         }
 
-        if (!messageResponses.isEmpty()) {
-            return ResponseEntity.badRequest().body(messageResponses);
-        }
+        modelUtil.map(columnRequest, columns);
+        ErrorResponse error = modelUtil.validate(columns);
 
-        return ResponseEntity.ok(new MessageResponse(MessageEnum.VALID, Columns.class));
+        if (!Objects.isNull(error)) {
+            throw new InvalidFieldException(error);
+        }
     }
 
 
@@ -63,45 +58,47 @@ public class ColumnService {
 
             columns = repository.save(columns);
 
-            if(Objects.isNull(board.get().getColumns()))
+            if (Objects.isNull(board.get().getColumns()))
                 board.get().setColumns(new ArrayList<>());
             board.get().getColumns().add(columns);
 
             boardRepository.save(board.get());
             return columns;
         } else {
-            return null;
+            throw new NotFoundException(Board.class);
         }
     }
 
 
     public Columns editColumn(Integer idColumn, ColumnRequest columnRequest) {
-        Optional<Columns> columnAux = repository.findById(idColumn);
-
-        if (columnAux.isPresent()) {
-            columnAux.get().setTitle(columnRequest.getTitle());
-            return repository.save(columnAux.get());
-        }
-        return null;
+        Columns columns = getColumn(idColumn);
+        columns.setTitle(columnRequest.getTitle());
+        return repository.save(columns);
     }
 
 
     public Columns getColumn(Integer idColumn) {
-        return repository.findById(idColumn).orElse(null);
+        Optional<Columns> columns = repository.findById(idColumn);
+        if (columns.isPresent()) {
+            return columns.get();
+        } else {
+            throw new NotFoundException(Board.class);
+        }
     }
 
 
     public List<Columns> getAllColumnsByBoard(Integer idBoard) {
-        return repository.findAllByBoardId(idBoard).orElse(null);
+        Optional<Board> board = boardRepository.findById(idBoard);
+        if (board.isPresent()) {
+            return repository.findAllByBoardId(idBoard).orElseGet(ArrayList::new);
+        }
+        throw new NotFoundException(Board.class);
     }
 
 
-    public boolean deleteColumn(Integer idColumn) {
-        if (repository.existsById(idColumn)) {
-            repository.deleteById(idColumn);
-            return true;
-        }
-        return false;
+    public void deleteColumn(Integer idColumn) {
+        Columns columns = getColumn(idColumn);
+        repository.deleteById(columns.getId());
     }
 
 

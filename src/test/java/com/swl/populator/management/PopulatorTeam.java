@@ -2,7 +2,7 @@ package com.swl.populator.management;
 
 import com.swl.models.management.Organization;
 import com.swl.models.management.Team;
-import com.swl.models.user.Collaborator;
+import com.swl.models.people.Collaborator;
 import com.swl.populator.config.PopulatorConfig;
 import com.swl.populator.project.PopulatorProject;
 import com.swl.populator.user.PopulatorCollaborator;

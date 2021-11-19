@@ -1,9 +1,9 @@
 package com.swl.service;
 
-import com.swl.models.user.Client;
-import com.swl.models.user.Collaborator;
+import com.swl.exceptions.business.NotFoundException;
+import com.swl.models.people.Client;
+import com.swl.models.people.Collaborator;
 import com.swl.repository.ClientRepository;
-import com.swl.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ public class ClientService {
             return collaborator.get();
         }
 
-        return null;
+        throw new NotFoundException(Client.class);
     }
 
 }

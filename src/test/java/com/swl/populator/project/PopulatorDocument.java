@@ -1,12 +1,10 @@
 package com.swl.populator.project;
 
 import com.swl.models.project.Document;
-import com.swl.models.project.Label;
 import com.swl.models.project.Project;
-import com.swl.models.user.Collaborator;
+import com.swl.models.people.Collaborator;
 import com.swl.populator.util.FakerUtil;
 import com.swl.repository.DocumentRepository;
-import com.swl.repository.LabelRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

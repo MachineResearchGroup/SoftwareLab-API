@@ -1,9 +1,9 @@
 package com.swl.controllers;
 
 import com.swl.config.swagger.ApiRoleAccessNotes;
-import com.swl.models.user.Collaborator;
-import com.swl.models.management.Organization;
 import com.swl.models.enums.MessageEnum;
+import com.swl.models.management.Organization;
+import com.swl.models.people.Collaborator;
 import com.swl.payload.request.OrganizationRequest;
 import com.swl.payload.response.MessageResponse;
 import com.swl.service.OrganizationService;
@@ -14,7 +14,6 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 
 @RestController
@@ -27,51 +26,15 @@ public class OrganizationController {
 
 
     @ApiRoleAccessNotes
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/")
-    @Secured("ROLE_PMO")
-    public ResponseEntity<?> getOrganizationsByCollaborator() {
-
-        try {
-            List<Organization> organizations = service.getOrganizationsByCollaborator();
-
-            if (!Objects.isNull(organizations)) {
-                return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, organizations));
-            } else {
-                return ResponseEntity.badRequest().body(new MessageResponse(MessageEnum.NOT_FOUND, Organization.class));
-            }
-
-        } catch (Exception e) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.NOT_FOUND, Organization.class, e.getMessage()));
-        }
-    }
-
-
-    @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/")
     @Secured("ROLE_PMO")
     public ResponseEntity<?> registerOrganization(@RequestBody OrganizationRequest organizationRequest) {
 
-        try {
-            var response = service.verifyOrganization(organizationRequest);
+        service.verifyOrganization(organizationRequest);
+        Organization organization = service.registerOrganization(organizationRequest);
+        return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, organization));
 
-            if(!response.getStatusCode().equals(HttpStatus.OK)){
-                return response;
-            }
-
-            Organization organization = service.registerOrganization(organizationRequest);
-
-            return !Objects.isNull(organization) ? ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, organization)) :
-                    ResponseEntity.badRequest().body(new MessageResponse(MessageEnum.NOT_REGISTERED, Organization.class));
-
-        } catch (Exception e) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.NOT_REGISTERED, e.getMessage()));
-        }
     }
 
 
@@ -80,71 +43,48 @@ public class OrganizationController {
     @PutMapping("/{idOrg}")
     @Secured("ROLE_PMO")
     public ResponseEntity<?> editOrganization(@PathVariable("idOrg") Integer idOrg,
-                                             @RequestBody OrganizationRequest organizationRequest) {
+                                              @RequestBody OrganizationRequest organizationRequest) {
 
-        try {
-            var response = service.verifyOrganization(organizationRequest);
+        service.verifyOrganization(organizationRequest);
+        Organization organization = service.editOrganization(idOrg, organizationRequest);
+        return ResponseEntity.ok(new MessageResponse(MessageEnum.EDITED, organization));
 
-            if(!response.getStatusCode().equals(HttpStatus.OK)){
-                return response;
-            }
+    }
 
-            Organization organization = service.editOrganization(idOrg, organizationRequest);
 
-            return !Objects.isNull(organization) ? ResponseEntity.ok(new MessageResponse(MessageEnum.EDITED, organization)) :
-                    ResponseEntity.badRequest().body(new MessageResponse(MessageEnum.NOT_FOUND, Organization.class));
+    @ApiRoleAccessNotes
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/")
+    @Secured({"ROLE_DEV", "ROLE_PO", "ROLE_PMO"})
+    public ResponseEntity<?> getOrganizationsByCollaborator() {
 
-        } catch (Exception e) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.UNEDITED, Organization.class, e.getMessage()));
-        }
+        List<Organization> organizations = service.getOrganizationsByCollaborator();
+        return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, organizations));
+
     }
 
 
     @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{idOrg}")
-    @Secured("ROLE_PMO")
+    @Secured({"ROLE_DEV", "ROLE_PO", "ROLE_PMO"})
     public ResponseEntity<?> getOrganization(@PathVariable("idOrg") Integer idOrg) {
 
-        try {
-            Organization organization = service.getOrganization(idOrg);
+        Organization organization = service.getOrganization(idOrg);
+        return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, organization));
 
-            if (!Objects.isNull(organization)) {
-                return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, organization));
-            } else {
-                return ResponseEntity.badRequest().body(new MessageResponse(MessageEnum.NOT_FOUND, Organization.class));
-            }
-
-        } catch (Exception e) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.NOT_FOUND, Organization.class, e.getMessage()));
-        }
     }
 
 
     @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/collaborators/{idOrg}")
-    @Secured("ROLE_PMO")
+    @Secured({"ROLE_DEV", "ROLE_PO", "ROLE_PMO"})
     public ResponseEntity<?> getCollaborators(@PathVariable("idOrg") Integer idOrg) {
 
-        try {
-            List<Collaborator> contributors = service.getCollaborators(idOrg);
+        List<Collaborator> contributors = service.getCollaborators(idOrg);
+        return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, contributors));
 
-            if (!Objects.isNull(contributors)) {
-                return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, contributors));
-            } else {
-                return ResponseEntity.badRequest().body(new MessageResponse(MessageEnum.NOT_FOUND, Organization.class));
-            }
-
-        } catch (Exception e) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.NOT_FOUND, Organization.class, e.getMessage()));
-        }
     }
 
 
@@ -154,16 +94,8 @@ public class OrganizationController {
     @Secured("ROLE_PMO")
     public ResponseEntity<?> deleteOrganization(@PathVariable("idOrg") Integer idOrg) {
 
-        try {
-            boolean organizationDeleted = service.deleteOrganization(idOrg);
+        service.deleteOrganization(idOrg);
+        return ResponseEntity.ok(new MessageResponse(MessageEnum.DELETED, Organization.class));
 
-            return organizationDeleted ? ResponseEntity.ok(new MessageResponse(MessageEnum.DELETED, Organization.class)) :
-                    ResponseEntity.badRequest().body(new MessageResponse(MessageEnum.NOT_FOUND, Organization.class));
-
-        } catch (Exception e) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse(MessageEnum.NOT_DELETED, Organization.class, e.getMessage()));
-        }
     }
 }

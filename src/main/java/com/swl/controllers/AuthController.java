@@ -57,15 +57,9 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest signUpRequest) {
-        String message = "";
 
-        try {
-            return service.registerUser(signUpRequest);
+        return service.registerUser(signUpRequest);
 
-        } catch (Exception e) {
-            message = "Login not done! " + e.getMessage();
-            return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
-        }
     }
 
 
@@ -78,15 +72,9 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/registerCollaborator")
     public ResponseEntity<?> registerCollaborator(@RequestBody CollaboratorRequest signUpRequest) {
-        String message = "";
 
-        try {
-            return service.registerCollaborator(signUpRequest);
+        return service.registerCollaborator(signUpRequest);
 
-        } catch (Exception e) {
-            message = "Login not done! " + e.getMessage();
-            return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
-        }
     }
 
 
@@ -99,14 +87,8 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/registerClient")
     public ResponseEntity<?> registerClient(@RequestBody ClientRequest signUpRequest) {
-        String message = "";
 
-        try {
-            return service.registerClient(signUpRequest);
+        return service.registerClient(signUpRequest);
 
-        } catch (Exception e) {
-            message = "Login not done! " + e.getMessage();
-            return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
-        }
     }
 }

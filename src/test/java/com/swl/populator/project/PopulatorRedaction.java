@@ -3,7 +3,7 @@ package com.swl.populator.project;
 import com.swl.models.project.Project;
 import com.swl.models.project.Redaction;
 import com.swl.models.project.Requirement;
-import com.swl.models.user.Client;
+import com.swl.models.people.Client;
 import com.swl.populator.config.PopulatorConfig;
 import com.swl.populator.util.CSVToArrayUtil;
 import com.swl.populator.util.FakerUtil;
@@ -13,7 +13,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;

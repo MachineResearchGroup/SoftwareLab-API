@@ -1,8 +1,8 @@
 package com.swl.service;
 
-import com.swl.models.user.Client;
-import com.swl.models.user.Collaborator;
-import com.swl.models.user.User;
+import com.swl.models.people.Client;
+import com.swl.models.people.Collaborator;
+import com.swl.models.people.User;
 import com.swl.repository.ClientRepository;
 import com.swl.repository.CollaboratorRepository;
 import com.swl.repository.UserRepository;

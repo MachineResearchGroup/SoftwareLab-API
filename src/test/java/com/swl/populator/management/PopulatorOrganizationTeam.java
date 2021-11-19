@@ -3,7 +3,7 @@ package com.swl.populator.management;
 import com.swl.models.management.Organization;
 import com.swl.models.management.OrganizationTeam;
 import com.swl.models.management.Team;
-import com.swl.models.user.Collaborator;
+import com.swl.models.people.Collaborator;
 import com.swl.repository.OrganizationTeamRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

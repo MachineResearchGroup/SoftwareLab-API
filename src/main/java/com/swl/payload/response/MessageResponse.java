@@ -44,4 +44,9 @@ public class MessageResponse {
 		this.message = String.format(messageEnum.getMessage(), value) + ": "+ error;
 	}
 
+	public MessageResponse(String message, ApiErrorResponse error){
+		this.message = message;
+		this.object = error;
+	}
+
 }

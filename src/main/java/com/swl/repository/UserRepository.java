@@ -1,6 +1,6 @@
 package com.swl.repository;
 
-import com.swl.models.user.User;
+import com.swl.models.people.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,9 +1,8 @@
 package com.swl.populator.project;
 
 import com.swl.models.management.Team;
-import com.swl.models.project.Event;
 import com.swl.models.project.Project;
-import com.swl.models.user.Collaborator;
+import com.swl.models.people.Collaborator;
 import com.swl.populator.config.PopulatorConfig;
 import com.swl.populator.user.PopulatorClient;
 import com.swl.populator.util.FakerUtil;

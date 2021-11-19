@@ -1,6 +1,6 @@
 package com.swl.repository;
 
-import com.swl.models.user.Collaborator;
+import com.swl.models.people.Collaborator;
 import com.swl.models.management.Team;
 import com.swl.models.management.Organization;
 import com.swl.models.management.OrganizationTeam;

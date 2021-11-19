@@ -3,7 +3,7 @@ package com.swl.populator.management;
 import com.swl.models.management.Address;
 import com.swl.models.management.Organization;
 import com.swl.models.management.OrganizationTeam;
-import com.swl.models.user.Collaborator;
+import com.swl.models.people.Collaborator;
 import com.swl.populator.config.PopulatorConfig;
 import com.swl.populator.user.PopulatorCollaborator;
 import com.swl.populator.util.CNPJGeneratorUtil;

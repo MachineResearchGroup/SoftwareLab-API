@@ -3,13 +3,13 @@ version: "3.7"
 services:
   database:
     image: postgres:9.6
-    container_name: "postgres-ws"
+    container_name: "postgres-swl"
     environment:
-      - POSTGRES_DB=ws
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=swl
+      - POSTGRES_USER=softwarelab
+      - POSTGRES_PASSWORD=softwarelab
       - TZ=UTC
     volumes:
       - "/var/lib/postgresql/data"
     ports:
-      - 5432:5432
+      - 5436:5432

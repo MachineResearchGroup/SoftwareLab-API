@@ -1,7 +1,7 @@
 package com.swl.repository;
 
-import com.swl.models.user.Client;
-import com.swl.models.user.User;
+import com.swl.models.people.Client;
+import com.swl.models.people.User;
 import com.swl.util.BuilderUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

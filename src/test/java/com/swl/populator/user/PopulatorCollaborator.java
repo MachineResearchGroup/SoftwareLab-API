@@ -1,7 +1,7 @@
 package com.swl.populator.user;
 
 import com.swl.models.enums.FunctionEnum;
-import com.swl.models.user.Collaborator;
+import com.swl.models.people.Collaborator;
 import com.swl.populator.util.RegisterGeneratorUtil;
 import com.swl.repository.CollaboratorRepository;
 import org.springframework.beans.factory.annotation.Autowired;

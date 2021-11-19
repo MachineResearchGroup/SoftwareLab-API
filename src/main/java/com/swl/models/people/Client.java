@@ -1,4 +1,4 @@
-package com.swl.models.user;
+package com.swl.models.people;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;

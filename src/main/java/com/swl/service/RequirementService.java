@@ -1,10 +1,11 @@
 package com.swl.service;
 
+import com.swl.exceptions.business.InvalidFieldException;
+import com.swl.exceptions.business.NotFoundException;
 import com.swl.models.enums.MessageEnum;
-import com.swl.models.project.Project;
-import com.swl.models.project.Redaction;
-import com.swl.models.project.Requirement;
+import com.swl.models.project.*;
 import com.swl.payload.request.RequirementRequest;
+import com.swl.payload.response.ErrorResponse;
 import com.swl.payload.response.MessageResponse;
 import com.swl.repository.ProjectRepository;
 import com.swl.repository.RequirementRepository;
@@ -32,22 +33,20 @@ public class RequirementService {
     private final RequirementRepository repository;
 
 
-    public ResponseEntity<?> verifyRequirement(RequirementRequest requirementRequest) {
+    public void verifyRequirement(RequirementRequest requirementRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
         Redaction redaction = new Redaction();
 
-        modelUtil.map(requirementRequest, redaction);
-        List<MessageResponse> messageResponses = modelUtil.validate(redaction);
-
         if (projectRepository.findById(requirementRequest.getIdProject()).isEmpty()) {
-            messageResponses.add(new MessageResponse(MessageEnum.NOT_FOUND, Project.class));
+            throw new NotFoundException(Project.class);
         }
 
-        if (!messageResponses.isEmpty()) {
-            return ResponseEntity.badRequest().body(messageResponses);
-        }
+        modelUtil.map(requirementRequest, redaction);
+        ErrorResponse error = modelUtil.validate(redaction);
 
-        return ResponseEntity.ok(new MessageResponse(MessageEnum.VALID, Requirement.class));
+        if (!Objects.isNull(error)) {
+            throw new InvalidFieldException(error);
+        }
     }
 
 
@@ -68,38 +67,40 @@ public class RequirementService {
 
             return requirement;
         } else {
-            return null;
+            throw new NotFoundException(Project.class);
         }
     }
 
 
     public Requirement editRequirement(Integer idReq, RequirementRequest requirementRequest) {
-        Optional<Requirement> redactionAux = repository.findById(idReq);
-
-        if (redactionAux.isPresent()) {
-            CopyUtil.copyProperties(requirementRequest, redactionAux);
-            return repository.save(redactionAux.get());
-        }
-        return null;
+        Requirement redactionAux = getRequirement(idReq);
+        CopyUtil.copyProperties(requirementRequest, redactionAux);
+        return repository.save(redactionAux);
     }
 
 
     public Requirement getRequirement(Integer idRequirement) {
-        return repository.findById(idRequirement).orElse(null);
+        Optional<Requirement> requirement = repository.findById(idRequirement);
+        if (requirement.isPresent()) {
+            return requirement.get();
+        } else {
+            throw new NotFoundException(Board.class);
+        }
     }
 
 
     public List<Requirement> getAllRequirementByProject(Integer idProject) {
-        return repository.findAllByProjectId(idProject).orElse(null);
+        Optional<Project> project = projectRepository.findById(idProject);
+        if (project.isPresent()) {
+            return repository.findAllByProjectId(idProject).orElseGet(ArrayList::new);
+        }
+        throw new NotFoundException(Project.class);
     }
 
 
-    public boolean deleteRequirement(Integer idRedaction) {
-        if (repository.existsById(idRedaction)) {
-            repository.deleteById(idRedaction);
-            return true;
-        }
-        return false;
+    public void deleteRequirement(Integer idRec) {
+        Requirement requirement = getRequirement(idRec);
+        repository.deleteById(requirement.getId());
     }
 
 }

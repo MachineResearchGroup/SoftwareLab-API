@@ -1,6 +1,6 @@
 package com.swl.populator.user;
 
-import com.swl.models.user.Client;
+import com.swl.models.people.Client;
 import com.swl.populator.util.FakerUtil;
 import com.swl.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;

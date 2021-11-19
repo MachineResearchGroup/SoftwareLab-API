@@ -1,6 +1,7 @@
 package com.swl.service;
 
-import com.swl.models.user.Collaborator;
+import com.swl.exceptions.business.NotFoundException;
+import com.swl.models.people.Collaborator;
 import com.swl.repository.CollaboratorRepository;
 import com.swl.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +13,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class CollaboratorService {
-
-    @Autowired
-    private final UserRepository userRepository;
 
     @Autowired
     private final CollaboratorRepository repository;
@@ -30,7 +28,7 @@ public class CollaboratorService {
             return collaborator.get();
         }
 
-        return null;
+        throw new NotFoundException(Collaborator.class);
     }
 
 }
