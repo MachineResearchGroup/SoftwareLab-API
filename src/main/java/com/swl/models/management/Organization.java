@@ -38,7 +38,6 @@ public class Organization {
     @PrimaryKeyJoinColumn
     private Address address;
 
-    @JsonIgnore
     @OneToOne
     private Collaborator supervisor;
 

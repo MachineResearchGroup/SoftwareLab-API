@@ -18,4 +18,8 @@ public interface TeamRepository extends JpaRepository<Team, Integer> {
 
     @Query("select distinct(t) from Team t join OrganizationTeam ot on ot.team.id = t.id where ot.collaborator.id =:idCollaborator")
     Optional<List<Team>> findAllByCollaboratorId(@Param("idCollaborator") Integer idCollaborator);
+
+    @Query(nativeQuery = true, value = "select t.* from team_projects tp join team t on t.id = tp.team_id " +
+            "where tp.projects_id =:idProject")
+    Optional<List<Team>> findAllByProjectId(@Param("idProject") Integer idProject);
 }

@@ -17,10 +17,10 @@ public interface CollaboratorRepository extends JpaRepository<Collaborator, Inte
 
     Optional<Collaborator> findCollaboratorByUserEmail(String email);
 
-    @Query("select oe.collaborator from OrganizationTeam oe where oe.organization.id =:idOrg")
+    @Query("select distinct oe.collaborator from OrganizationTeam oe where oe.organization.id =:idOrg")
     Optional<List<Collaborator>> findAllCollaboratorByOrganizationId(@Param("idOrg") Integer idOrg);
 
-    @Query("select oe.collaborator from OrganizationTeam oe where oe.team.id =:idTeam")
+    @Query("select distinct oe.collaborator from OrganizationTeam oe where oe.team.id =:idTeam")
     Optional<List<Collaborator>> findAllCollaboratorByTeamId(@Param("idTeam") Integer idTeam);
 
     @Query("select oe.collaborator from OrganizationTeam oe where oe.organization.id =:idOrg " +

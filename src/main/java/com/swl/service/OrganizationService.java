@@ -47,10 +47,6 @@ public class OrganizationService {
         ModelUtil modelUtil = ModelUtil.getInstance();
         Organization organization = new Organization();
 
-        if (repository.findOrganizationByCnpj(registerRequest.getCnpj()).isPresent()) {
-            throw new AlreadyExistsException("cnpj");
-        }
-
         modelUtil.map(registerRequest, organization);
         ErrorResponse error = modelUtil.validate(organization);
 
@@ -64,6 +60,10 @@ public class OrganizationService {
         ModelUtil modelUtil = ModelUtil.getInstance();
         Organization organization = new Organization();
         OrganizationTeam organizationTeam = new OrganizationTeam();
+
+        if (repository.findOrganizationByCnpj(registerRequest.getCnpj()).isPresent()) {
+            throw new AlreadyExistsException("cnpj");
+        }
 
         modelUtil.map(registerRequest, organization);
 
@@ -123,7 +123,8 @@ public class OrganizationService {
 
     public List<Organization> getOrganizationsByCollaborator() {
         if (userService.getCurrentUser().isPresent() && userService.getCurrentUser().get() instanceof Collaborator) {
-            return repository.findOrganizationByCollaboratorId(((Collaborator) userService.getCurrentUser().get()).getId()).get();
+            Optional<List<Organization>> organization = repository.findOrganizationByCollaboratorId(((Collaborator) userService.getCurrentUser().get()).getId());
+            return organization.orElseGet(ArrayList::new);
         }
         throw new NotFoundException(((User) userService.getCurrentUser().get()).getEmail());
     }

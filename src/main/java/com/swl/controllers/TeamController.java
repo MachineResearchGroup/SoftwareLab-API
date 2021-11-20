@@ -2,6 +2,7 @@ package com.swl.controllers;
 
 import com.swl.config.swagger.ApiRoleAccessNotes;
 import com.swl.models.enums.MessageEnum;
+import com.swl.models.management.Organization;
 import com.swl.models.management.Team;
 import com.swl.models.people.Collaborator;
 import com.swl.payload.request.TeamRequest;
@@ -94,6 +95,9 @@ public class TeamController {
     public ResponseEntity<?> getCollaborators(@PathVariable("idTeam") Integer idTeam) {
 
         List<Collaborator> collaborators = service.getCollaborators(idTeam);
+        if(collaborators.isEmpty()){
+            return ResponseEntity.ok(new MessageResponse(MessageEnum.EMPTY, Collaborator.class, collaborators));
+        }
         return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, collaborators));
 
     }
@@ -118,6 +122,9 @@ public class TeamController {
     public ResponseEntity<?> getAllTeamByOrganization(@PathVariable("idOrg") Integer idOrg) {
 
         List<Team> teams = service.getAllTeamByOrganization(idOrg);
+        if(teams.isEmpty()){
+            return ResponseEntity.ok(new MessageResponse(MessageEnum.EMPTY, Team.class, teams));
+        }
         return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, teams));
 
     }
@@ -130,6 +137,9 @@ public class TeamController {
     public ResponseEntity<?> getTeamsByCollaborator() {
 
         List<Team> teams = service.getTeamsByCollaborator();
+        if(teams.isEmpty()){
+            return ResponseEntity.ok(new MessageResponse(MessageEnum.EMPTY, Team.class, teams));
+        }
         return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, teams));
 
     }

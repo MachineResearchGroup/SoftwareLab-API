@@ -171,6 +171,11 @@ public class ProjectService {
 
     public void deleteProject(Integer idProject) {
         Project project = getProject(idProject);
+        Optional<List<Team>> teams = teamRepository.findAllByProjectId(project.getId());
+        teams.ifPresent(teamList -> teamList.forEach(t -> {
+            t.getProjects().remove(project);
+            teamRepository.save(t);
+        }));
         repository.deleteById(project.getId());
     }
 

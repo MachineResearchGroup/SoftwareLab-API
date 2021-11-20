@@ -1,7 +1,6 @@
 package com.swl.models.people;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,7 +29,6 @@ public class Collaborator {
     @NotNull
     private String function;
 
-    @JsonIgnore
     @ManyToOne
     private Collaborator supervisor;
 

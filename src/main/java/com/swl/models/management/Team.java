@@ -26,7 +26,6 @@ public class Team {
     @ManyToMany
     private List<Project> projects;
 
-    @JsonIgnore
     @ManyToOne
     private Collaborator supervisor;
 }

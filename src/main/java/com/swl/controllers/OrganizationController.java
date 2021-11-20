@@ -59,6 +59,9 @@ public class OrganizationController {
     public ResponseEntity<?> getOrganizationsByCollaborator() {
 
         List<Organization> organizations = service.getOrganizationsByCollaborator();
+        if(organizations.isEmpty()){
+            return ResponseEntity.ok(new MessageResponse(MessageEnum.EMPTY, Organization.class, organizations));
+        }
         return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, organizations));
 
     }
@@ -83,6 +86,9 @@ public class OrganizationController {
     public ResponseEntity<?> getCollaborators(@PathVariable("idOrg") Integer idOrg) {
 
         List<Collaborator> contributors = service.getCollaborators(idOrg);
+        if(contributors.isEmpty()){
+            return ResponseEntity.ok(new MessageResponse(MessageEnum.EMPTY, Collaborator.class, contributors));
+        }
         return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, contributors));
 
     }

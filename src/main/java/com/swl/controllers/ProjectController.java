@@ -3,6 +3,7 @@ package com.swl.controllers;
 import com.swl.config.swagger.ApiRoleAccessNotes;
 import com.swl.models.enums.MessageEnum;
 import com.swl.models.people.Client;
+import com.swl.models.people.Collaborator;
 import com.swl.models.project.Project;
 import com.swl.payload.request.ProjectRequest;
 import com.swl.payload.response.MessageResponse;
@@ -78,7 +79,7 @@ public class ProjectController {
 
     @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.OK)
-    @DeleteMapping("/addClientInProject/}")
+    @PostMapping("/addClientInProject/}")
     @Secured("ROLE_PMO")
     public ResponseEntity<?> addClientInProject(@RequestParam(name = "idProject") Integer idProject,
                                                 @RequestParam(name = "idClient") String clientEmail) {
@@ -116,6 +117,9 @@ public class ProjectController {
             projects = service.getAllProjectsByCollaboratorActual();
         }
 
+        if(projects.isEmpty()){
+            return ResponseEntity.ok(new MessageResponse(MessageEnum.EMPTY, Project.class, projects));
+        }
         return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, projects));
     }
 
