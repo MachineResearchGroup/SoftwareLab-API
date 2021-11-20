@@ -1,13 +1,17 @@
 package com.swl.service;
 
+import com.swl.exceptions.business.AlreadyExistsException;
+import com.swl.exceptions.business.InvalidFieldException;
+import com.swl.exceptions.business.NotFoundException;
 import com.swl.models.management.Organization;
 import com.swl.models.people.Collaborator;
 import com.swl.payload.request.AddessRequest;
 import com.swl.payload.request.OrganizationRequest;
 import com.swl.repository.CollaboratorRepository;
-import com.swl.repository.OrganizationTeamRepository;
 import com.swl.repository.OrganizationRepository;
+import com.swl.repository.OrganizationTeamRepository;
 import com.swl.util.BuilderUtil;
+import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,7 +22,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 @SpringBootTest
@@ -40,6 +47,7 @@ public class OrganizationServiceTest {
 
     private OrganizationService service;
 
+    AtomicBoolean thrownException = new AtomicBoolean(false);
 
     @BeforeEach
     public void initUseCase() {
@@ -87,6 +95,53 @@ public class OrganizationServiceTest {
 
         response = service.registerOrganization(registerRequest);
         Assertions.assertEquals(response, organization);
+    }
+
+
+    @Test
+    public void registerOrganization_ErrorField() {
+        Collaborator collaborator = BuilderUtil.buildCollaborator();
+        Organization organization = BuilderUtil.buildOrganization();
+
+        OrganizationRequest registerRequest = OrganizationRequest.builder()
+                .name(organization.getName())
+                .cnpj(organization.getCnpj())
+                .address(null)
+                .build();
+
+        organization.setSupervisor(collaborator);
+        Mockito.when(repository.findOrganizationByCnpj(organization.getCnpj())).thenReturn(Optional.of(organization));
+
+        thrownException.set(false);
+        try {
+            service.registerOrganization(registerRequest);
+        } catch (AlreadyExistsException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
+    }
+
+
+    @Test
+    public void registerOrganization_AlreadyExists() {
+        Collaborator collaborator = BuilderUtil.buildCollaborator();
+        Organization organization = BuilderUtil.buildOrganization();
+
+        OrganizationRequest registerRequest = OrganizationRequest.builder()
+                .name(organization.getName())
+                .cnpj(organization.getCnpj())
+                .address(null)
+                .build();
+
+        organization.setSupervisor(collaborator);
+
+        thrownException.set(false);
+        try {
+            service.registerOrganization(registerRequest);
+        } catch (InvalidFieldException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
@@ -140,8 +195,13 @@ public class OrganizationServiceTest {
 
         Mockito.when(repository.findById(1)).thenReturn(Optional.empty());
 
-        var response = service.editOrganization(1, registerRequest);
-        Assertions.assertNull(response);
+        thrownException.set(false);
+        try {
+            service.editOrganization(1, registerRequest);
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
@@ -159,14 +219,22 @@ public class OrganizationServiceTest {
     @Test
     public void getOrganization_Error() {
         Mockito.when(repository.findById(1)).thenReturn(Optional.empty());
-
-        var response = service.getOrganization(1);
-        Assertions.assertNull(response);
+        thrownException.set(false);
+        try {
+            service.getOrganization(1);
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
     @Test
     public void getCollaborators_Sucessfully() {
+        Organization organization = BuilderUtil.buildOrganizationWithAddress();
+        organization.setId(1);
+
+        Mockito.when(repository.findById(1)).thenReturn(Optional.of(organization));
         Mockito.when(collaboratorRepository.findAllCollaboratorByOrganizationId(1))
                 .thenReturn(Optional.of(new ArrayList<>(Collections.singletonList(Mockito.mock(Collaborator.class)))));
 
@@ -176,20 +244,45 @@ public class OrganizationServiceTest {
 
 
     @Test
-    public void deleteOrganization_Sucessfully() {
-        Mockito.when(repository.existsById(1)).thenReturn(true);
-        service.deleteOrganization(1);
+    public void getOrganizationsByCollaborator_Sucessfully() {
+        Collaborator collaborator = BuilderUtil.buildCollaborator();
+        Organization organization = BuilderUtil.buildOrganizationWithAddress();
+        collaborator.setId(1);
+        organization.setId(1);
 
-//        Assertions.assertTrue(response);
+        Mockito.when(userService.getCurrentUser()).thenReturn(Optional.of(collaborator));
+        Mockito.when(repository.findOrganizationByCollaboratorId(1)).thenReturn(
+                Optional.of(new ArrayList<>(Collections.singletonList(organization))));
+
+        var response = service.getOrganizationsByCollaborator();
+        Assertions.assertEquals(response.size(), 1);
+    }
+
+
+    @Test
+    public void deleteOrganization_Sucessfully() {
+        Organization organization = BuilderUtil.buildOrganizationWithAddress();
+        organization.setId(1);
+
+        Mockito.when(repository.findById(1)).thenReturn(Optional.of(organization));
+        service.deleteOrganization(1);
     }
 
 
     @Test
     public void deleteOrganization_Error() {
-        Mockito.when(repository.existsById(1)).thenReturn(false);
+        Organization organization = BuilderUtil.buildOrganizationWithAddress();
+        organization.setId(1);
 
-        service.deleteOrganization(1);
-//        Assertions.assertFalse(response);
+        Mockito.when(repository.findById(1)).thenReturn(Optional.empty());
+
+        thrownException.set(false);
+        try {
+            service.deleteOrganization(1);
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 }

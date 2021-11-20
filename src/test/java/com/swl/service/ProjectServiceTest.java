@@ -1,5 +1,9 @@
 package com.swl.service;
 
+import com.swl.exceptions.business.AlreadyExistsException;
+import com.swl.exceptions.business.EmptyException;
+import com.swl.exceptions.business.NotFoundException;
+import com.swl.models.management.Organization;
 import com.swl.models.management.Team;
 import com.swl.models.people.Client;
 import com.swl.models.project.Project;
@@ -20,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 @SpringBootTest
@@ -49,6 +54,8 @@ public class ProjectServiceTest {
     private OrganizationRepository organizationRepository;
 
     private ProjectService service;
+
+    AtomicBoolean thrownException = new AtomicBoolean(false);
 
 
     @BeforeEach
@@ -97,8 +104,13 @@ public class ProjectServiceTest {
 
         Mockito.when(teamRepository.findById(1)).thenReturn(Optional.empty());
 
-        var response = service.registerProject(projetoRequest);
-        Assertions.assertNull(response);
+        thrownException.set(false);
+        try {
+            service.registerProject(projetoRequest);
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
@@ -134,8 +146,13 @@ public class ProjectServiceTest {
 
         Mockito.when(repository.findById(1)).thenReturn(Optional.empty());
 
-        var response = service.editProject(1, projetoRequest);
-        Assertions.assertNull(response);
+        thrownException.set(false);
+        try {
+            service.editProject(1, projetoRequest);
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
@@ -153,26 +170,32 @@ public class ProjectServiceTest {
     public void getProject_Error() {
         Mockito.when(repository.findById(1)).thenReturn(Optional.empty());
 
-        var response = service.getProject(1);
-        Assertions.assertNull(response);
+        thrownException.set(false);
+        try {
+            service.getProject(1);
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
     @Test
     public void deleteProject_Sucessfully() {
         Mockito.when(repository.existsById(1)).thenReturn(true);
-
         service.deleteProject(1);
-//        Assertions.assertTrue(response);
     }
 
 
     @Test
     public void deleteProject_Error() {
-        Mockito.when(repository.existsById(1)).thenReturn(false);
-
-        service.deleteProject(1);
-//        Assertions.assertFalse(response);
+        thrownException.set(false);
+        try {
+            service.deleteProject(1);
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
@@ -186,7 +209,6 @@ public class ProjectServiceTest {
                 .thenReturn(Optional.of(Mockito.mock(Client.class)));
 
         service.addClientInProject(1, "client@gmail.com");
-//        Assertions.assertTrue(response);
 
         project = BuilderUtil.buildProject();
         Client client = Mockito.mock(Client.class);
@@ -197,18 +219,22 @@ public class ProjectServiceTest {
                 .thenReturn(Optional.of(client));
 
         service.addClientInProject(1, "client@gmail.com");
-//        Assertions.assertTrue(response);
     }
 
 
     @Test
     public void addClientInProject_Error() {
-        Mockito.when(repository.findById(1)).thenReturn(Optional.empty());
+        Project project = BuilderUtil.buildProject();
+        Mockito.when(repository.findById(1)).thenReturn(Optional.ofNullable(project));
         Mockito.when(clientRepository.findClientByUserEmail("client@gmail.com"))
-                .thenReturn(Optional.of(Mockito.mock(Client.class)));
+                .thenReturn(Optional.empty());
 
-        service.addClientInProject(1, "client@gmail.com");
-//        Assertions.assertFalse(response);
+        thrownException.set(false);
+        try {
+            service.addClientInProject(1, "client@gmail.com");
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
     }
 
 
@@ -225,15 +251,43 @@ public class ProjectServiceTest {
 
 
     @Test
+    public void getAllProjectsByTeam_Error() {
+        Mockito.when(teamRepository.findById(1)).thenReturn(Optional.empty());
+
+        thrownException.set(false);
+        try {
+            service.getAllProjectsByTeam(1);
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+    }
+
+
+    @Test
     public void getAllProjectsByOrganization_Sucessfully() {
         Team team = BuilderUtil.buildTeam();
         team.setProjects(new ArrayList<>(Collections.singletonList(Mockito.mock(Project.class))));
         List<Team> teamList = new ArrayList<>(Collections.singletonList(team));
 
+        Mockito.when(organizationRepository.findById(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
         Mockito.when(teamService.getAllTeamByOrganization(1)).thenReturn(teamList);
 
         var response = service.getAllProjectsByOrganization(1);
         Assertions.assertEquals(response.get(0), team.getProjects().get(0));
+    }
+
+
+    @Test
+    public void getAllProjectsByOrganization_ErrorEmpty() {
+        Mockito.when(organizationRepository.findById(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
+        Mockito.when(teamService.getAllTeamByOrganization(1)).thenReturn(new ArrayList<>());
+
+        thrownException.set(false);
+        try {
+            service.getAllProjectsByOrganization(1);
+        } catch (EmptyException e) {
+            thrownException.set(true);
+        }
     }
 
 

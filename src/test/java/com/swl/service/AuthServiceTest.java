@@ -2,6 +2,8 @@ package com.swl.service;
 
 import com.swl.config.security.jwt.JwtUtils;
 import com.swl.config.security.services.UserDetailsImpl;
+import com.swl.exceptions.business.AlreadyExistsException;
+import com.swl.exceptions.business.NotFoundException;
 import com.swl.models.people.Client;
 import com.swl.models.people.Collaborator;
 import com.swl.models.people.User;
@@ -15,6 +17,7 @@ import com.swl.payload.response.JwtResponse;
 import com.swl.payload.response.MessageResponse;
 import com.swl.repository.*;
 import com.swl.util.BuilderUtil;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +35,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 
@@ -115,9 +119,13 @@ public class AuthServiceTest {
 
         Mockito.when(userRepository.existsByUsername(registerRequest.getUsername())).thenReturn(true);
 
-        var response = service.registerUser(registerRequest);
-
-        Assertions.assertEquals(response.getBody(), new MessageResponse(MessageEnum.ALREADY_USED, "username"));
+        AtomicBoolean thrownException = new AtomicBoolean(false);
+        try {
+            service.registerUser(registerRequest);
+        }catch(AlreadyExistsException e){
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
@@ -134,9 +142,13 @@ public class AuthServiceTest {
         Mockito.when(userRepository.existsByUsername(registerRequest.getUsername())).thenReturn(false);
         Mockito.when(userRepository.existsByEmail(registerRequest.getEmail())).thenReturn(true);
 
-        var response = service.registerUser(registerRequest);
-
-        Assertions.assertEquals(response.getBody(), new MessageResponse(MessageEnum.ALREADY_USED, "email"));
+        AtomicBoolean thrownException = new AtomicBoolean(false);
+        try {
+            service.registerUser(registerRequest);
+        }catch(AlreadyExistsException e){
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
@@ -170,9 +182,13 @@ public class AuthServiceTest {
 
         Mockito.when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
 
-        var response = service.registerCollaborator(registerRequest);
-
-        Assertions.assertEquals(response.getBody(), new MessageResponse(MessageEnum.NOT_FOUND, "email"));
+        AtomicBoolean thrownException = new AtomicBoolean(false);
+        try {
+            service.registerCollaborator(registerRequest);
+        }catch(NotFoundException e){
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
@@ -188,9 +204,48 @@ public class AuthServiceTest {
 
         Mockito.when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
 
-        var response = service.registerCollaborator(registerRequest);
+        AtomicBoolean thrownException = new AtomicBoolean(false);
+        try {
+            service.registerCollaborator(registerRequest);
+        }catch(NotFoundException e){
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
+    }
 
-        Assertions.assertEquals(response.getBody(), new MessageResponse(MessageEnum.NOT_FOUND, "function"));
+
+    @Test
+    public void registerCollaborator_AlreadyExists() {
+        User user = BuilderUtil.buildUser();
+        user.setId(1);
+
+        CollaboratorRequest registerRequest = CollaboratorRequest.builder()
+                .email(user.getEmail())
+                .register("1234")
+                .function("PMO")
+                .build();
+
+        Mockito.when(userRepository.findByEmail(registerRequest.getEmail())).thenReturn(Optional.of(user));
+        Mockito.when(collaboratorRepository.findCollaboratorByUserId(1)).thenReturn(Optional.of(Mockito.mock(Collaborator.class)));
+
+        AtomicBoolean thrownException = new AtomicBoolean(false);
+        try {
+            service.registerCollaborator(registerRequest);
+        }catch(AlreadyExistsException e){
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
+
+        Mockito.when(collaboratorRepository.findCollaboratorByUserId(1)).thenReturn(Optional.empty());
+        Mockito.when(clientRepository.findClientByUserId(1)).thenReturn(Optional.of(Mockito.mock(Client.class)));
+
+        thrownException = new AtomicBoolean(false);
+        try {
+            service.registerCollaborator(registerRequest);
+        }catch(AlreadyExistsException e){
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
@@ -234,9 +289,47 @@ public class AuthServiceTest {
 
         Mockito.when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
 
-        var response = service.registerClient(registerRequest);
+        AtomicBoolean thrownException = new AtomicBoolean(false);
+        try {
+            service.registerClient(registerRequest);
+        }catch(NotFoundException e){
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
+    }
 
-        Assertions.assertEquals(response.getBody(), new MessageResponse(MessageEnum.NOT_FOUND, "email"));
+
+    @Test
+    public void registerClient_AlreadyExists() {
+        User user = BuilderUtil.buildUser();
+        user.setId(1);
+
+        ClientRequest registerRequest = ClientRequest.builder()
+                .email(user.getEmail())
+                .corporateName("Cliente ABC")
+                .build();
+
+        Mockito.when(userRepository.findByEmail(registerRequest.getEmail())).thenReturn(Optional.of(user));
+        Mockito.when(collaboratorRepository.findCollaboratorByUserId(1)).thenReturn(Optional.of(Mockito.mock(Collaborator.class)));
+
+        AtomicBoolean thrownException = new AtomicBoolean(false);
+        try {
+            service.registerClient(registerRequest);
+        }catch(AlreadyExistsException e){
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
+
+        Mockito.when(collaboratorRepository.findCollaboratorByUserId(1)).thenReturn(Optional.empty());
+        Mockito.when(clientRepository.findClientByUserId(1)).thenReturn(Optional.of(Mockito.mock(Client.class)));
+
+        thrownException = new AtomicBoolean(false);
+        try {
+            service.registerClient(registerRequest);
+        }catch(AlreadyExistsException e){
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 

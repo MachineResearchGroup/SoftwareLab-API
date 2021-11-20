@@ -45,7 +45,7 @@ public class OrganizationService {
     private final UserService userService;
 
 
-    public void verifyOrganization(OrganizationRequest registerRequest) {
+    private void verifyOrganization(OrganizationRequest registerRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
         Organization organization = new Organization();
 
@@ -60,6 +60,8 @@ public class OrganizationService {
 
     @Transactional
     public Organization registerOrganization(OrganizationRequest registerRequest) {
+        verifyOrganization(registerRequest);
+
         ModelUtil modelUtil = ModelUtil.getInstance();
         Organization organization = new Organization();
         OrganizationTeam organizationTeam = new OrganizationTeam();

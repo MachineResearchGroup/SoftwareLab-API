@@ -31,7 +31,6 @@ public class OrganizationController {
     @Secured("ROLE_PMO")
     public ResponseEntity<?> registerOrganization(@RequestBody OrganizationRequest organizationRequest) {
 
-        service.verifyOrganization(organizationRequest);
         Organization organization = service.registerOrganization(organizationRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, organization));
 
@@ -45,7 +44,6 @@ public class OrganizationController {
     public ResponseEntity<?> editOrganization(@PathVariable("idOrg") Integer idOrg,
                                               @RequestBody OrganizationRequest organizationRequest) {
 
-        service.verifyOrganization(organizationRequest);
         Organization organization = service.editOrganization(idOrg, organizationRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.EDITED, organization));
 

@@ -33,7 +33,6 @@ public class ProjectController {
     @Secured({"ROLE_PO", "ROLE_PMO"})
     public ResponseEntity<?> registerProject(@RequestBody ProjectRequest projectRequest) {
 
-        service.verifyProject(projectRequest);
         Project project = service.registerProject(projectRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, project));
 
@@ -46,7 +45,6 @@ public class ProjectController {
     @Secured({"ROLE_PO", "ROLE_PMO"})
     public ResponseEntity<?> editProject(@PathVariable("idProject") Integer idProject, @RequestBody ProjectRequest projectRequest) {
 
-        service.verifyProject(projectRequest);
         Project editProject = service.editProject(idProject, projectRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.EDITED, editProject));
 

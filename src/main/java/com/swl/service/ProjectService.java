@@ -50,13 +50,9 @@ public class ProjectService {
     private final OrganizationRepository organizationRepository;
 
 
-    public void verifyProject(ProjectRequest projectRequest) {
+    private void verifyProject(ProjectRequest projectRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
         Project project = new Project();
-
-        if (teamRepository.findById(projectRequest.getIdTeam()).isEmpty()) {
-            throw new NotFoundException(Team.class);
-        }
 
         modelUtil.map(projectRequest, project);
         ErrorResponse error = modelUtil.validate(project);
@@ -69,6 +65,7 @@ public class ProjectService {
 
     @Transactional
     public Project registerProject(ProjectRequest projectRequest) {
+        verifyProject(projectRequest);
 
         Optional<Team> teamOptional = teamRepository.findById(projectRequest.getIdTeam());
         if (teamOptional.isPresent()) {
@@ -214,8 +211,9 @@ public class ProjectService {
                 project.getClients().add(clientOptional.get());
             }
             repository.save(project);
+        }else {
+            throw new NotFoundException(Client.class);
         }
-        throw new NotFoundException(Client.class);
     }
 
 }

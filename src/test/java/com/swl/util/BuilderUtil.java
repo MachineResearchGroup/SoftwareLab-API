@@ -42,7 +42,7 @@ public class BuilderUtil {
 
     public static Organization buildOrganization() {
         return Organization.builder()
-                .cnpj("12345678912345")
+                .cnpj("06.214.736/0001-49")
                 .name("Empresa A")
                 .build();
     }
@@ -50,7 +50,7 @@ public class BuilderUtil {
 
     public static Organization buildOrganizationWithAddress() {
         return Organization.builder()
-                .cnpj("12345678912345")
+                .cnpj("06.214.736/0001-49")
                 .name("Empresa A")
                 .address(buildAddress())
                 .build();
