@@ -5,6 +5,7 @@ import com.swl.models.enums.MessageEnum;
 import com.swl.models.management.Organization;
 import com.swl.models.management.Team;
 import com.swl.models.people.Collaborator;
+import com.swl.payload.request.CollaboratorRequest;
 import com.swl.payload.request.TeamRequest;
 import com.swl.payload.response.MessageResponse;
 import com.swl.service.TeamService;
@@ -80,9 +81,10 @@ public class TeamController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/collaborators/{idTeam}")
     @Secured({"ROLE_PO", "ROLE_PMO"})
-    public ResponseEntity<?> addCollaborator(@PathVariable("idTeam") Integer idTeam, @RequestBody List<String> emails) {
+    public ResponseEntity<?> addCollaborator(@PathVariable("idTeam") Integer idTeam,
+                                             @RequestBody List<CollaboratorRequest> collaboratorRequests) {
 
-        List<Collaborator> collaboratorList = service.addCollaborator(idTeam, emails);
+        List<Collaborator> collaboratorList = service.addCollaborator(idTeam, collaboratorRequests);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.ADDED, collaboratorList));
 
     }

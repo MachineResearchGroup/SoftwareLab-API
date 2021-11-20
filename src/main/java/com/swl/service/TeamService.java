@@ -8,6 +8,7 @@ import com.swl.models.management.OrganizationTeam;
 import com.swl.models.management.Team;
 import com.swl.models.people.Collaborator;
 import com.swl.models.people.User;
+import com.swl.payload.request.CollaboratorRequest;
 import com.swl.payload.request.TeamRequest;
 import com.swl.payload.response.ErrorResponse;
 import com.swl.repository.CollaboratorRepository;
@@ -41,6 +42,9 @@ public class TeamService {
 
     @Autowired
     private final OrganizationTeamRepository organizationTeamRepository;
+
+    @Autowired
+    private final AuthService authService;
 
     @Autowired
     private final UserService userService;
@@ -179,23 +183,32 @@ public class TeamService {
     }
 
 
-    public List<Collaborator> addCollaborator(Integer idTeam, List<String> emails) {
+    public List<Collaborator> addCollaborator(Integer idTeam, List<CollaboratorRequest> collaboratorRequests) {
         Team team = getTeam(idTeam);
 
         Optional<Organization> orgOptional = organizationRepository.findOrganizationByTeamId(team.getId());
 
         if (orgOptional.isPresent()) {
-            List<Optional<Collaborator>> userList = emails.stream()
-                    .map(collaboratorRepository::findCollaboratorByUserEmail)
-                    .collect(Collectors.toList());
+            List<Collaborator> userList = collaboratorRequests.stream()
+                    .map(e -> {
+                        Optional<Collaborator> collaborator = collaboratorRepository.findCollaboratorByUserEmail(e.getEmail());
+
+                        if(collaborator.isPresent()){
+                            return collaborator.get();
+                        }else{
+                            authService.registerCollaborator(e);
+                        }
+
+                        return collaboratorRepository.findCollaboratorByUserEmail(e.getEmail()).get();
+                    }).collect(Collectors.toList());
 
 
-            userList.stream().filter(Optional::isPresent).forEach(c -> {
-                if (organizationTeamRepository.findByTeamIdAndCollaboratorId(idTeam, c.get().getId()).isEmpty()) {
+            userList.forEach(c -> {
+                if (organizationTeamRepository.findByTeamIdAndCollaboratorId(idTeam, c.getId()).isEmpty()) {
                     OrganizationTeam organizationTeam = OrganizationTeam.builder()
                             .organization(orgOptional.get())
                             .team(team)
-                            .collaborator(c.get())
+                            .collaborator(c)
                             .build();
                     organizationTeamRepository.save(organizationTeam);
                 }
