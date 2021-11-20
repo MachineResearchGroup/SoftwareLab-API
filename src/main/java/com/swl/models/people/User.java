@@ -35,6 +35,9 @@ public class User {
     @JsonIgnore
     private String password;
 
+    @Lob
+    private byte[] profileImage;
+
     @ElementCollection
     @JoinTable(name = "user_phone")
     private List<String> phones;

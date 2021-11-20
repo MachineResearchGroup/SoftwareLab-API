@@ -31,6 +31,9 @@ public class Project {
 
     private String repository;
 
+    @Lob
+    private byte[] icon;
+
     @JsonIgnore
     @ManyToMany
     private List<Client> clients;

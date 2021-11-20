@@ -34,6 +34,9 @@ public class Organization {
     @CNPJ(message = "Invalid cpnj format")
     private String cnpj;
 
+    @Lob
+    private byte[] icon;
+
     @OneToOne(mappedBy = "organization", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private Address address;

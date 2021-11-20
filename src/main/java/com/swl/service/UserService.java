@@ -1,5 +1,7 @@
 package com.swl.service;
 
+import com.swl.exceptions.business.NotFoundException;
+import com.swl.models.management.Team;
 import com.swl.models.people.Client;
 import com.swl.models.people.Collaborator;
 import com.swl.models.people.User;
@@ -12,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Service
@@ -28,6 +31,7 @@ public class UserService {
     private final ClientRepository clientRepository;
 
 
+    @Transactional
     public Optional getCurrentUser() {
         Optional<User> userOptional = Optional.empty();
 
@@ -53,4 +57,20 @@ public class UserService {
         return userOptional;
     }
 
+
+    @Transactional
+    public User saveUser(User user){
+        return userRepository.save(user);
+    }
+
+
+    @Transactional
+    public User getUser(Integer idUser) {
+        Optional<User> user = userRepository.findById(idUser);
+        if (user.isPresent()) {
+            return user.get();
+        } else {
+            throw new NotFoundException(User.class);
+        }
+    }
 }

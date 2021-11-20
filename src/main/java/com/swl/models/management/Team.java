@@ -22,6 +22,9 @@ public class Team {
     @NonNull
     private String name;
 
+    @Lob
+    private byte[] icon;
+
     @JsonIgnore
     @ManyToMany
     private List<Project> projects;

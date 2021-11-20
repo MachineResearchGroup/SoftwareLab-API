@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -66,6 +67,7 @@ public class ProjectService {
     }
 
 
+    @Transactional
     public Project registerProject(ProjectRequest projectRequest) {
 
         Optional<Team> teamOptional = teamRepository.findById(projectRequest.getIdTeam());
@@ -80,7 +82,7 @@ public class ProjectService {
                 teamOptional.get().setProjects(new ArrayList<>());
             teamOptional.get().getProjects().add(project);
 
-            project = repository.save(project);
+            project = saveProject(project);
             teamRepository.save(teamOptional.get());
 
             return project;
@@ -89,17 +91,24 @@ public class ProjectService {
         }
     }
 
+    @Transactional
+    public Project saveProject(Project project){
+        return repository.save(project);
+    }
 
+
+    @Transactional
     public Project editProject(Integer idProject, ProjectRequest project) {
         Project projectAux = getProject(idProject);
         projectAux.setName(project.getName());
         projectAux.setDescription(project.getDescription());
         projectAux.setRepository(project.getRepository());
 
-        return repository.save(projectAux);
+        return saveProject(projectAux);
     }
 
 
+    @Transactional
     public Project getProject(Integer idProject) {
         Optional<Project> project = repository.findById(idProject);
         if (project.isPresent()) {
@@ -110,6 +119,7 @@ public class ProjectService {
     }
 
 
+    @Transactional
     public List<Project> getAllProjectsByClient(Integer idClient) {
         if (clientRepository.existsById(idClient)) {
             return repository.findAllByClientId(idClient).orElseGet(ArrayList::new);
@@ -118,6 +128,7 @@ public class ProjectService {
     }
 
 
+    @Transactional
     public List<Project> getAllProjectsByCollaborator(Integer idCollaborator) {
         if (collaboratorRepository.existsById(idCollaborator)) {
             Optional<List<Team>> teams = teamRepository.findAllByCollaboratorId(idCollaborator);
@@ -134,6 +145,7 @@ public class ProjectService {
     }
 
 
+    @Transactional
     public List<Project> getAllProjectsByCollaboratorActual() {
         if (userService.getCurrentUser().isPresent() && userService.getCurrentUser().get() instanceof Collaborator) {
             return getAllProjectsByCollaborator(((Collaborator) userService.getCurrentUser().get()).getId());
@@ -142,6 +154,7 @@ public class ProjectService {
     }
 
 
+    @Transactional
     public List<Project> getAllProjectsByTeam(Integer idTeam) {
         Optional<Team> team = teamRepository.findById(idTeam);
         if (team.isPresent()) {
@@ -153,6 +166,7 @@ public class ProjectService {
     }
 
 
+    @Transactional
     public List<Project> getAllProjectsByOrganization(Integer idOrganization) {
         Optional<Organization> organization = organizationRepository.findById(idOrganization);
 

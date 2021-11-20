@@ -17,9 +17,11 @@ import com.swl.repository.OrganizationTeamRepository;
 import com.swl.util.CopyUtil;
 import com.swl.util.ModelUtil;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -56,6 +58,7 @@ public class OrganizationService {
     }
 
 
+    @Transactional
     public Organization registerOrganization(OrganizationRequest registerRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
         Organization organization = new Organization();
@@ -72,7 +75,7 @@ public class OrganizationService {
             organizationTeam.setCollaborator((Collaborator) userService.getCurrentUser().get());
         }
         organization.setAddress(null);
-        organization = repository.save(organization);
+        organization = saveOrganization(organization);
 
         if (!Objects.isNull(registerRequest.getAddress())) {
             Address address = new Address();
@@ -81,7 +84,7 @@ public class OrganizationService {
             address.setOrganization(organization);
             organization.setAddress(address);
 
-            organization = repository.save(organization);
+            organization = saveOrganization(organization);
         }
 
         organizationTeam.setOrganization(organization);
@@ -93,6 +96,12 @@ public class OrganizationService {
     }
 
 
+    public Organization saveOrganization(Organization organization){
+        return repository.save(organization);
+    }
+
+
+    @Transactional
     public Organization editOrganization(Integer idOrg, OrganizationRequest registerRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
 
@@ -102,7 +111,7 @@ public class OrganizationService {
             Organization orgEdit = org.get();
             modelUtil.map(registerRequest, orgEdit);
 
-            orgEdit = repository.save(orgEdit);
+            orgEdit = saveOrganization(orgEdit);
 
             if (!Objects.isNull(registerRequest.getAddress())) {
                 Address address = new Address();
@@ -112,7 +121,7 @@ public class OrganizationService {
                 address.setOrganization(orgEdit);
                 orgEdit.setAddress(address);
 
-                orgEdit = repository.save(orgEdit);
+                orgEdit = saveOrganization(orgEdit);
             }
             return orgEdit;
         }
@@ -121,6 +130,7 @@ public class OrganizationService {
     }
 
 
+    @Transactional
     public List<Organization> getOrganizationsByCollaborator() {
         if (userService.getCurrentUser().isPresent() && userService.getCurrentUser().get() instanceof Collaborator) {
             Optional<List<Organization>> organization = repository.findOrganizationByCollaboratorId(((Collaborator) userService.getCurrentUser().get()).getId());
@@ -130,6 +140,7 @@ public class OrganizationService {
     }
 
 
+    @Transactional
     public Organization getOrganization(Integer idOrg) {
         Optional<Organization> organization = repository.findById(idOrg);
         if (organization.isPresent()) {

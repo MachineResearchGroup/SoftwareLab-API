@@ -8,6 +8,7 @@ import com.swl.models.management.OrganizationTeam;
 import com.swl.models.management.Team;
 import com.swl.models.people.Collaborator;
 import com.swl.models.people.User;
+import com.swl.models.project.Project;
 import com.swl.payload.request.TeamRequest;
 import com.swl.payload.response.ErrorResponse;
 import com.swl.repository.CollaboratorRepository;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -68,6 +70,7 @@ public class TeamService {
     }
 
 
+    @Transactional
     public Team registerTeam(TeamRequest teamRequest) {
         Optional<Organization> org = organizationRepository.findById(teamRequest.getIdOrganization());
 
@@ -84,7 +87,7 @@ public class TeamService {
                 } else {
                     throw new NotFoundException(Collaborator.class);
                 }
-                team = repository.save(team);
+                team = saveTeam(team);
 
                 OrganizationTeam organizationTeam = OrganizationTeam.builder()
                         .organization(org.get())
@@ -98,7 +101,7 @@ public class TeamService {
                         .name(teamRequest.getName())
                         .build();
 
-                team = repository.save(team);
+                team = saveTeam(team);
             }
 
             OrganizationTeam organizationTeam = OrganizationTeam.builder()
@@ -115,6 +118,13 @@ public class TeamService {
     }
 
 
+    @Transactional
+    public Team saveTeam(Team team){
+        return repository.save(team);
+    }
+
+
+    @Transactional
     public Team editTeam(Integer idTeam, TeamRequest teamRequest) {
         Optional<Team> teamAux = repository.findById(idTeam);
 
@@ -133,6 +143,7 @@ public class TeamService {
     }
 
 
+    @Transactional
     public Team getTeam(Integer idTeam) {
         Optional<Team> team = repository.findById(idTeam);
         if (team.isPresent()) {
@@ -150,6 +161,7 @@ public class TeamService {
     }
 
 
+    @Transactional
     public List<Team> getAllTeamByOrganization(Integer idOrganization) {
         Optional<Organization> organization = organizationRepository.findById(idOrganization);
 
@@ -162,6 +174,7 @@ public class TeamService {
     }
 
 
+    @Transactional
     public List<Team> getTeamsByCollaborator() {
         if (userService.getCurrentUser().isPresent() && userService.getCurrentUser().get() instanceof Collaborator) {
             Optional<List<Team>> teams = repository.findAllByCollaboratorId(((Collaborator) userService.getCurrentUser().get()).getId());
@@ -179,6 +192,7 @@ public class TeamService {
     }
 
 
+    @Transactional
     public List<Collaborator> addCollaborator(Integer idTeam, List<String> emails) {
         Team team = getTeam(idTeam);
 
