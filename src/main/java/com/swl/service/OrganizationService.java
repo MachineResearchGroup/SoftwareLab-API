@@ -138,7 +138,7 @@ public class OrganizationService {
             Optional<List<Organization>> organization = repository.findOrganizationByCollaboratorId(((Collaborator) userService.getCurrentUser().get()).getId());
             return organization.orElseGet(ArrayList::new);
         }
-        throw new NotFoundException(((User) userService.getCurrentUser().get()).getEmail());
+        throw new NotFoundException(Collaborator.class);
     }
 
 

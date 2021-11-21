@@ -17,7 +17,7 @@ import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/project/board")
+@RequestMapping("/board")
 @RequiredArgsConstructor
 public class BoardController {
 
@@ -30,7 +30,6 @@ public class BoardController {
     @Secured({"ROLE_PO"})
     public ResponseEntity<?> registerBoard(@RequestBody BoardRequest boardRequest) {
 
-        service.verifyBoard(boardRequest);
         Board board = service.registerBoard(boardRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, board));
 
@@ -43,7 +42,6 @@ public class BoardController {
     @Secured({"ROLE_PO"})
     public ResponseEntity<?> editBoard(@PathVariable("idBoard") Integer idBoard, @RequestBody BoardRequest boardRequest) {
 
-        service.verifyBoard(boardRequest);
         Board editBoard = service.editBoard(idBoard, boardRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.EDITED, editBoard));
 

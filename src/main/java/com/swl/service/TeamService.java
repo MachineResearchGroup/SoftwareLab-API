@@ -8,7 +8,7 @@ import com.swl.models.management.OrganizationTeam;
 import com.swl.models.management.Team;
 import com.swl.models.people.Collaborator;
 import com.swl.models.people.User;
-import com.swl.models.project.Project;
+import com.swl.payload.request.CollaboratorRequest;
 import com.swl.payload.request.TeamRequest;
 import com.swl.payload.response.ErrorResponse;
 import com.swl.repository.CollaboratorRepository;
@@ -16,6 +16,7 @@ import com.swl.repository.OrganizationRepository;
 import com.swl.repository.OrganizationTeamRepository;
 import com.swl.repository.TeamRepository;
 import com.swl.util.ModelUtil;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,26 +46,20 @@ public class TeamService {
     private final OrganizationTeamRepository organizationTeamRepository;
 
     @Autowired
+    private final AuthService authService;
+
+    @Autowired
     private final UserService userService;
 
 
-    public void verifyTeam(TeamRequest teamRequest) {
+    private void verifyTeam(TeamRequest teamRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
         Team team = new Team();
-
-        if (!Objects.isNull(teamRequest.getSupervisorEmail()) &&
-                collaboratorRepository.findCollaboratorByUserEmail(teamRequest.getSupervisorEmail()).isEmpty()) {
-            throw new NotFoundException(Collaborator.class);
-        }
-
-        if (organizationRepository.findById(teamRequest.getIdOrganization()).isEmpty()) {
-            throw new NotFoundException(Organization.class);
-        }
 
         modelUtil.map(teamRequest, team);
         ErrorResponse error = modelUtil.validate(team);
 
-        if(!Objects.isNull(error)){
+        if (!Objects.isNull(error)) {
             throw new InvalidFieldException(error);
         }
     }
@@ -72,6 +67,8 @@ public class TeamService {
 
     @Transactional
     public Team registerTeam(TeamRequest teamRequest) {
+        verifyTeam(teamRequest);
+
         Optional<Organization> org = organizationRepository.findById(teamRequest.getIdOrganization());
 
         if (org.isPresent()) {
@@ -119,13 +116,14 @@ public class TeamService {
 
 
     @Transactional
-    public Team saveTeam(Team team){
+    public Team saveTeam(Team team) {
         return repository.save(team);
     }
 
 
     @Transactional
     public Team editTeam(Integer idTeam, TeamRequest teamRequest) {
+        verifyTeam(teamRequest);
         Optional<Team> teamAux = repository.findById(idTeam);
 
         if (teamAux.isPresent()) {
@@ -180,7 +178,7 @@ public class TeamService {
             Optional<List<Team>> teams = repository.findAllByCollaboratorId(((Collaborator) userService.getCurrentUser().get()).getId());
             return teams.orElseGet(ArrayList::new);
         }
-        throw new NotFoundException(((User) userService.getCurrentUser().get()).getEmail());
+        throw new NotFoundException(Collaborator.class);
     }
 
 
@@ -193,23 +191,33 @@ public class TeamService {
 
 
     @Transactional
-    public List<Collaborator> addCollaborator(Integer idTeam, List<String> emails) {
+    public List<Collaborator> addCollaborator(Integer idTeam, List<CollaboratorRequest> collaboratorRequests) {
+
         Team team = getTeam(idTeam);
 
         Optional<Organization> orgOptional = organizationRepository.findOrganizationByTeamId(team.getId());
 
         if (orgOptional.isPresent()) {
-            List<Optional<Collaborator>> userList = emails.stream()
-                    .map(collaboratorRepository::findCollaboratorByUserEmail)
-                    .collect(Collectors.toList());
+            List<Collaborator> userList = collaboratorRequests.stream()
+                    .map(e -> {
+                        Optional<Collaborator> collaborator = collaboratorRepository.findCollaboratorByUserEmail(e.getEmail());
+
+                        if (collaborator.isPresent()) {
+                            return collaborator.get();
+                        } else {
+                            authService.registerCollaborator(e);
+                        }
+
+                        return collaboratorRepository.findCollaboratorByUserEmail(e.getEmail()).get();
+                    }).collect(Collectors.toList());
 
 
-            userList.stream().filter(Optional::isPresent).forEach(c -> {
-                if (organizationTeamRepository.findByTeamIdAndCollaboratorId(idTeam, c.get().getId()).isEmpty()) {
+            userList.forEach(c -> {
+                if (organizationTeamRepository.findByTeamIdAndCollaboratorId(idTeam, c.getId()).isEmpty()) {
                     OrganizationTeam organizationTeam = OrganizationTeam.builder()
                             .organization(orgOptional.get())
                             .team(team)
-                            .collaborator(c.get())
+                            .collaborator(c)
                             .build();
                     organizationTeamRepository.save(organizationTeam);
                 }
@@ -230,9 +238,10 @@ public class TeamService {
         Optional<List<Collaborator>> collaboratorList = collaboratorRepository.findAllCollaboratorByTeamId(team.getId());
 
         if (collaboratorList.isPresent()) {
-            List<Collaborator> removeCollaborators = emails.stream().map(e -> collaboratorRepository
-                    .findCollaboratorByUserEmail(e).orElseGet(null))
-                    .collect(Collectors.toList());
+            List<Collaborator> removeCollaborators = emails.stream().map(e -> {
+                Optional<Collaborator> collaborator = collaboratorRepository.findCollaboratorByUserEmail(e);
+                return collaborator.orElse(null);
+            }).filter(Objects::nonNull).collect(Collectors.toList());
 
             removeCollaborators.forEach(c -> {
                 Optional<OrganizationTeam> organizacaoEquipeOptional = organizationTeamRepository
@@ -241,7 +250,7 @@ public class TeamService {
             });
 
             return collaboratorRepository.findAllCollaboratorByTeamId(idTeam).orElseGet(ArrayList::new);
-        }else{
+        } else {
             throw new EmptyException(Team.class);
         }
     }

@@ -1,15 +1,20 @@
 package com.swl.service;
 
+import com.swl.exceptions.business.EmptyException;
+import com.swl.exceptions.business.NotFoundException;
 import com.swl.models.people.Collaborator;
 import com.swl.models.management.Organization;
 import com.swl.models.management.OrganizationTeam;
 import com.swl.models.management.Team;
+import com.swl.models.people.User;
+import com.swl.payload.request.CollaboratorRequest;
 import com.swl.payload.request.TeamRequest;
 import com.swl.repository.CollaboratorRepository;
 import com.swl.repository.OrganizationRepository;
 import com.swl.repository.OrganizationTeamRepository;
 import com.swl.repository.TeamRepository;
 import com.swl.util.BuilderUtil;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 @SpringBootTest
@@ -44,14 +50,20 @@ public class TeamServiceTest {
     private OrganizationTeamRepository organizationTeamRepository;
 
     @Mock
+    private AuthService authService;
+
+    @Mock
     private UserService userService;
 
     private TeamService service;
 
+    AtomicBoolean thrownException = new AtomicBoolean(false);
+
 
     @BeforeEach
     public void initUseCase() {
-        service = new TeamService(repository, organizationRepository, collaboratorRepository, organizationTeamRepository, userService);
+        service = new TeamService(repository, organizationRepository, collaboratorRepository, organizationTeamRepository,
+                authService, userService);
     }
 
 
@@ -107,9 +119,13 @@ public class TeamServiceTest {
         Mockito.when(organizationRepository.findById(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
         Mockito.when(collaboratorRepository.findCollaboratorByUserEmail(equipeRequest.getSupervisorEmail())).thenReturn(Optional.empty());
 
-        var response = service.registerTeam(equipeRequest);
-
-        Assertions.assertNull(response);
+        thrownException.set(false);
+        try {
+            service.registerTeam(equipeRequest);
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
@@ -125,9 +141,13 @@ public class TeamServiceTest {
 
         Mockito.when(organizationRepository.findById(1)).thenReturn(Optional.empty());
 
-        var response = service.registerTeam(equipeRequest);
-
-        Assertions.assertNull(response);
+        thrownException.set(false);
+        try {
+            service.registerTeam(equipeRequest);
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
@@ -160,9 +180,14 @@ public class TeamServiceTest {
                 .build();
 
         Mockito.when(repository.findById(1)).thenReturn(Optional.empty());
-        var response = service.editTeam(1, equipeRequest);
 
-        Assertions.assertNull(response);
+        thrownException.set(false);
+        try {
+            service.editTeam(1, equipeRequest);
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
@@ -177,66 +202,102 @@ public class TeamServiceTest {
 
 
     @Test
-    public void deleteEquipe_Sucessfully() {
-
-        Mockito.when(repository.existsById(1)).thenReturn(true);
+    public void deleteTeam_Sucessfully() {
+        Team team = BuilderUtil.buildTeam();
+        team.setId(1);
+        Mockito.when(repository.findById(1)).thenReturn(Optional.of(team));
         Mockito.when(organizationTeamRepository.findAllByTeamId(1))
                 .thenReturn(Optional.of(new ArrayList<>(Collections.singletonList(Mockito.mock(OrganizationTeam.class)))));
 
        service.deleteTeam(1);
-
-//        Assertions.assertTrue(response);
     }
 
 
     @Test
-    public void deleteEquipe_Error() {
-        Mockito.when(repository.existsById(1)).thenReturn(false);
-        service.deleteTeam(1);
+    public void deleteTeam_Error() {
+        Mockito.when(repository.findById(1)).thenReturn(Optional.empty());
 
-//        Assertions.assertFalse(response);
+        thrownException.set(false);
+        try {
+            service.deleteTeam(1);
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
     @Test
     public void addColaborador_Sucessfully() {
+        User user = BuilderUtil.buildUser();
+        user.setId(1);
+
+        Collaborator collaborator = BuilderUtil.buildCollaborator();
+        collaborator.setUser(user);
+
         Team team = BuilderUtil.buildTeam();
         team.setId(1);
 
-        List<Collaborator> collaboratorList = new ArrayList<>(Collections.singletonList(Mockito.mock(Collaborator.class)));
-        String email = "teste@gmai.com";
+        CollaboratorRequest collaboratorRequest = CollaboratorRequest.builder()
+                .email(collaborator.getUser().getEmail())
+                .function(collaborator.getFunction())
+                .build();
+
+        List<Collaborator> collaboratorList = new ArrayList<>(Collections.singletonList(collaborator));
 
         Mockito.when(repository.findById(1)).thenReturn(Optional.of(team));
 
         Mockito.when(organizationRepository.findOrganizationByTeamId(1)).thenReturn(Optional.of(Mockito.mock(Organization.class)));
 
-        Mockito.when(collaboratorRepository.findCollaboratorByUserEmail(email))
+        Mockito.when(collaboratorRepository.findCollaboratorByUserEmail(collaboratorRequest.getEmail()))
                 .thenReturn(Optional.of(Mockito.mock(Collaborator.class)));
 
         Mockito.when(collaboratorRepository.findAllCollaboratorByTeamId(1))
                 .thenReturn(Optional.of(collaboratorList));
 
-        var response = service.addCollaborator(1, new ArrayList<>(Collections.singletonList(email)));
-        Assertions.assertEquals(response, collaboratorList);
+        var response = service.addCollaborator(1, new ArrayList<>(Collections.singletonList(collaboratorRequest)));
+        Assertions.assertEquals(response.size(), 1);
     }
 
 
     @Test
     public void addColaborador_Error() {
+        User user = BuilderUtil.buildUser();
+        user.setId(1);
+
+        Collaborator collaborator = BuilderUtil.buildCollaborator();
+        collaborator.setUser(user);
+
         Team team = BuilderUtil.buildTeam();
         team.setId(1);
 
-        String email = "teste@gmai.com";
+        CollaboratorRequest collaboratorRequest = CollaboratorRequest.builder()
+                .email(collaborator.getUser().getEmail())
+                .function(collaborator.getFunction())
+                .build();
 
-        Mockito.when(repository.findById(1)).thenReturn(Optional.empty());
+        Mockito.when(repository.findById(1)).thenReturn(Optional.of(team));
 
-        var response = service.addCollaborator(1, new ArrayList<>(Collections.singletonList(email)));
-        Assertions.assertNull(response);
+        Mockito.when(organizationRepository.findOrganizationByTeamId(1))
+                .thenReturn(Optional.empty());
+
+        thrownException.set(false);
+        try {
+            service.addCollaborator(1, new ArrayList<>(Collections.singletonList(collaboratorRequest)));
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
     @Test
     public void getColaboradores_Sucessfully() {
+        Team team = BuilderUtil.buildTeam();
+        team.setId(1);
+
+        Mockito.when(repository.findById(1)).thenReturn(Optional.of(team));
+
         List<Collaborator> collaboratorList = new ArrayList<>(Collections.singletonList(Mockito.mock(Collaborator.class)));
 
         Mockito.when(collaboratorRepository.findAllCollaboratorByTeamId(1))
@@ -244,16 +305,6 @@ public class TeamServiceTest {
 
         var response = service.getCollaborators(1);
         Assertions.assertEquals(response, collaboratorList);
-    }
-
-
-    @Test
-    public void getColaboradores_Error() {
-        Mockito.when(collaboratorRepository.findAllCollaboratorByTeamId(1))
-                .thenReturn(Optional.empty());
-
-        var response = service.getCollaborators(1);
-        Assertions.assertEquals(response, new ArrayList<>());
     }
 
 
@@ -283,7 +334,7 @@ public class TeamServiceTest {
 
 
     @Test
-    public void deleteColaborador_Error() {
+    public void deleteColaborador_ErrorEmpty() {
         Team team = BuilderUtil.buildTeam();
         team.setId(1);
 
@@ -291,10 +342,16 @@ public class TeamServiceTest {
         collaboratorList.get(0).setId(1);
         String email = "teste@gmai.com";
 
-        Mockito.when(repository.findById(1)).thenReturn(Optional.empty());
+        Mockito.when(repository.findById(1)).thenReturn(Optional.of(team));
+        Mockito.when(collaboratorRepository.findAllCollaboratorByTeamId(1)).thenReturn(Optional.empty());
 
-        var response = service.deleteCollaborators(1, new ArrayList<>(Collections.singletonList(email)));
-        Assertions.assertNull(response);
+        thrownException.set(false);
+        try {
+            service.deleteCollaborators(1, new ArrayList<>(Collections.singletonList(email)));
+        } catch (EmptyException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 
 
@@ -309,5 +366,48 @@ public class TeamServiceTest {
 
         var response = service.getAllTeamByOrganization(1);
         Assertions.assertEquals(response, teamList);
+    }
+
+
+    @Test
+    public void getAllTeamByOrganization_Error() {
+        Mockito.when(organizationRepository.findById(1)).thenReturn(Optional.empty());
+
+        thrownException.set(false);
+        try {
+            service.getAllTeamByOrganization(1);
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
+    }
+
+
+    @Test
+    public void getTeamsByCollaboratorActual_Sucessfully() {
+        Collaborator collaborator = BuilderUtil.buildCollaborator();
+        collaborator.setId(1);
+        List<Team> teamList = new ArrayList<>(Collections.singletonList(Mockito.mock(Team.class)));
+
+        Mockito.when(userService.getCurrentUser()).thenReturn(Optional.of(collaborator));
+        Mockito.when( repository.findAllByCollaboratorId(1))
+                .thenReturn(Optional.of(teamList));
+
+        var response = service.getTeamsByCollaborator();
+        Assertions.assertEquals(response, teamList);
+    }
+
+
+    @Test
+    public void getTeamsByCollaboratorActual_Error() {
+        Mockito.when(userService.getCurrentUser()).thenReturn(Optional.empty());
+
+        thrownException.set(false);
+        try {
+            service.getTeamsByCollaborator();
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+        Assertions.assertTrue(thrownException.get());
     }
 }

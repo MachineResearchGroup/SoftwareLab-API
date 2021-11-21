@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.IntStream;
@@ -41,12 +42,12 @@ public class PopulatorRedaction {
     }
 
 
-    private LocalDate getDate() {
+    private LocalDateTime getDate() {
         try {
-            return FakerUtil.getInstance().faker.date().between(new SimpleDateFormat("dd/MM/yyyy").parse("01/01/2019"),
-                    new SimpleDateFormat("dd/MM/yyyy").parse("31/12/2021")).toInstant()
+            return FakerUtil.getInstance().faker.date().between(new SimpleDateFormat("dd/MM/yyyy HH:mm").parse("01/01/2019 09:00"),
+                    new SimpleDateFormat("dd/MM/yyyy").parse("31/12/2021 09:00")).toInstant()
                     .atZone(ZoneId.systemDefault())
-                    .toLocalDate();
+                    .toLocalDateTime();
         } catch (ParseException ignored) {
         }
         return null;

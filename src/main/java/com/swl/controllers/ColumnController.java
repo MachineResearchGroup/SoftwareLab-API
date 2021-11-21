@@ -17,7 +17,7 @@ import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/project/board/column")
+@RequestMapping("/column")
 @RequiredArgsConstructor
 public class ColumnController {
 
@@ -30,7 +30,6 @@ public class ColumnController {
     @Secured({"ROLE_DEV", "ROLE_PO"})
     public ResponseEntity<?> registerColumn(@RequestBody ColumnRequest columnRequest) {
 
-        service.verifyColumn(columnRequest);
         Columns column = service.registerColumn(columnRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, column));
 
@@ -43,7 +42,6 @@ public class ColumnController {
     @Secured({"ROLE_DEV", "ROLE_PO"})
     public ResponseEntity<?> editColumn(@PathVariable("idColumn") Integer idColumn, @RequestBody ColumnRequest columnRequest) {
 
-        service.verifyColumn(columnRequest);
         Columns editColumn = service.editColumn(idColumn, columnRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.EDITED, editColumn));
 

@@ -1,19 +1,16 @@
 package com.swl.service;
 
-import com.swl.exceptions.business.InvalidFieldException;
 import com.swl.exceptions.business.NotFoundException;
-import com.swl.models.enums.MessageEnum;
-import com.swl.models.project.*;
+import com.swl.models.management.Team;
+import com.swl.models.project.Board;
+import com.swl.models.project.Project;
+import com.swl.models.project.Requirement;
 import com.swl.payload.request.RequirementRequest;
-import com.swl.payload.response.ErrorResponse;
-import com.swl.payload.response.MessageResponse;
 import com.swl.repository.ProjectRepository;
 import com.swl.repository.RequirementRepository;
 import com.swl.util.CopyUtil;
-import com.swl.util.ModelUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,30 +30,12 @@ public class RequirementService {
     private final RequirementRepository repository;
 
 
-    public void verifyRequirement(RequirementRequest requirementRequest) {
-        ModelUtil modelUtil = ModelUtil.getInstance();
-        Redaction redaction = new Redaction();
-
-        if (projectRepository.findById(requirementRequest.getIdProject()).isEmpty()) {
-            throw new NotFoundException(Project.class);
-        }
-
-        modelUtil.map(requirementRequest, redaction);
-        ErrorResponse error = modelUtil.validate(redaction);
-
-        if (!Objects.isNull(error)) {
-            throw new InvalidFieldException(error);
-        }
-    }
-
-
     public Requirement registerRequirement(RequirementRequest requirementRequest) {
-        ModelUtil modelUtil = ModelUtil.getInstance();
         Optional<Project> project = projectRepository.findById(requirementRequest.getIdProject());
 
         if (project.isPresent()) {
             Requirement requirement = new Requirement();
-            modelUtil.map(requirementRequest, requirement);
+            CopyUtil.copyProperties(requirementRequest, requirement);
 
             requirement = repository.save(requirement);
             if (Objects.isNull(project.get().getRequirements()))
@@ -74,8 +53,14 @@ public class RequirementService {
 
     public Requirement editRequirement(Integer idReq, RequirementRequest requirementRequest) {
         Requirement redactionAux = getRequirement(idReq);
-        CopyUtil.copyProperties(requirementRequest, redactionAux);
-        return repository.save(redactionAux);
+        Optional<Project> project = projectRepository.findById(requirementRequest.getIdProject());
+
+        if (project.isPresent()) {
+            CopyUtil.copyProperties(requirementRequest, redactionAux);
+            return repository.save(redactionAux);
+        } else {
+            throw new NotFoundException(Project.class);
+        }
     }
 
 
@@ -100,6 +85,11 @@ public class RequirementService {
 
     public void deleteRequirement(Integer idRec) {
         Requirement requirement = getRequirement(idRec);
+        Optional<List<Project>> project = projectRepository.findAllByRequirementId(requirement.getId());
+        project.ifPresent(projects -> projects.forEach(p -> {
+            p.getRequirements().remove(requirement);
+            projectRepository.save(p);
+        }));
         repository.deleteById(requirement.getId());
     }
 

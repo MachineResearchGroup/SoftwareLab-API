@@ -1,6 +1,5 @@
 package com.swl.models.management;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.swl.models.people.Collaborator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

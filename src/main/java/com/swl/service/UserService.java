@@ -1,7 +1,6 @@
 package com.swl.service;
 
 import com.swl.exceptions.business.NotFoundException;
-import com.swl.models.management.Team;
 import com.swl.models.people.Client;
 import com.swl.models.people.Collaborator;
 import com.swl.models.people.User;
@@ -59,7 +58,7 @@ public class UserService {
 
 
     @Transactional
-    public User saveUser(User user){
+    public User saveUser(User user) {
         return userRepository.save(user);
     }
 
@@ -73,4 +72,25 @@ public class UserService {
             throw new NotFoundException(User.class);
         }
     }
+
+
+    @Transactional
+    public Object getUserByEmail(String email) {
+        Optional<Collaborator> collaborator = collaboratorRepository.findCollaboratorByUserEmail(email);
+        if (collaborator.isPresent()) {
+            return collaborator.get();
+        }
+
+        Optional<Client> client = clientRepository.findClientByUserEmail(email);
+        if (client.isPresent()) {
+            return client.get();
+        }
+
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent()) {
+            return user.get();
+        }
+        throw new NotFoundException(User.class);
+    }
+
 }

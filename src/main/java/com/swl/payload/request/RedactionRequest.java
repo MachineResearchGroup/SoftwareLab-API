@@ -15,8 +15,6 @@ public class RedactionRequest {
     @Size(max = 500)
     private String description;
 
-    private LocalDate date;
-
     private Integer idProject;
 
     private Integer idClient;

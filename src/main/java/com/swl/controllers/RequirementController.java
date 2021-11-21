@@ -2,7 +2,6 @@ package com.swl.controllers;
 
 import com.swl.config.swagger.ApiRoleAccessNotes;
 import com.swl.models.enums.MessageEnum;
-import com.swl.models.project.Project;
 import com.swl.models.project.Requirement;
 import com.swl.payload.request.RequirementRequest;
 import com.swl.payload.response.MessageResponse;
@@ -14,12 +13,11 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/project/requirement")
+@RequestMapping("/requirement")
 @RequiredArgsConstructor
 public class RequirementController {
 
@@ -32,7 +30,6 @@ public class RequirementController {
     @Secured({"ROLE_DEV", "ROLE_PO"})
     public ResponseEntity<?> registerRequirement(@RequestBody RequirementRequest requirementRequest) {
 
-        service.verifyRequirement(requirementRequest);
         Requirement requirement = service.registerRequirement(requirementRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, requirement));
 
@@ -45,21 +42,8 @@ public class RequirementController {
     @Secured({"ROLE_DEV", "ROLE_PO"})
     public ResponseEntity<?> editRequirement(@PathVariable("idRequirement") Integer idRequirement, @RequestBody RequirementRequest requirementRequest) {
 
-        service.verifyRequirement(requirementRequest);
         Requirement editRequirement = service.editRequirement(idRequirement, requirementRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.EDITED, editRequirement));
-
-    }
-
-
-    @ApiRoleAccessNotes
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/all/{idProject}")
-    @Secured({"ROLE_DEV", "ROLE_PO"})
-    public ResponseEntity<?> getAllRequirements(@PathVariable("idProject") Integer idProject) {
-
-        List<Requirement> requirements = service.getAllRequirementByProject(idProject);
-        return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, requirements));
 
     }
 
@@ -71,6 +55,21 @@ public class RequirementController {
     public ResponseEntity<?> getRequirement(@PathVariable("idRequirement") Integer idRequirement) {
 
         Requirement requirement = service.getRequirement(idRequirement);
+        return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, requirement));
+
+    }
+
+
+    @ApiRoleAccessNotes
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/")
+    @Secured({"ROLE_DEV", "ROLE_PO"})
+    public ResponseEntity<?> getRequirements(@RequestParam(value = "idProject", required = false) Integer idProject) {
+
+        List<Requirement> requirement = service.getAllRequirementByProject(idProject);
+        if (requirement.isEmpty()) {
+            return ResponseEntity.ok(new MessageResponse(MessageEnum.EMPTY, Requirement.class, requirement));
+        }
         return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, requirement));
 
     }

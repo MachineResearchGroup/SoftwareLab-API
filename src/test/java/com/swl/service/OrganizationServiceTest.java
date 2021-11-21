@@ -105,17 +105,16 @@ public class OrganizationServiceTest {
 
         OrganizationRequest registerRequest = OrganizationRequest.builder()
                 .name(organization.getName())
-                .cnpj(organization.getCnpj())
+                .cnpj("1234")
                 .address(null)
                 .build();
 
         organization.setSupervisor(collaborator);
-        Mockito.when(repository.findOrganizationByCnpj(organization.getCnpj())).thenReturn(Optional.of(organization));
 
         thrownException.set(false);
         try {
             service.registerOrganization(registerRequest);
-        } catch (AlreadyExistsException e) {
+        } catch (InvalidFieldException e) {
             thrownException.set(true);
         }
         Assertions.assertTrue(thrownException.get());
@@ -134,11 +133,12 @@ public class OrganizationServiceTest {
                 .build();
 
         organization.setSupervisor(collaborator);
+        Mockito.when(repository.findOrganizationByCnpj(organization.getCnpj())).thenReturn(Optional.of(organization));
 
         thrownException.set(false);
         try {
             service.registerOrganization(registerRequest);
-        } catch (InvalidFieldException e) {
+        } catch (AlreadyExistsException e) {
             thrownException.set(true);
         }
         Assertions.assertTrue(thrownException.get());

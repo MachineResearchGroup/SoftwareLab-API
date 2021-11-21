@@ -4,6 +4,7 @@ import com.swl.exceptions.business.InvalidFieldException;
 import com.swl.exceptions.business.NotFoundException;
 import com.swl.models.project.Board;
 import com.swl.models.project.Columns;
+import com.swl.models.project.Project;
 import com.swl.payload.request.ColumnRequest;
 import com.swl.payload.response.ErrorResponse;
 import com.swl.repository.BoardRepository;
@@ -30,13 +31,9 @@ public class ColumnService {
     private final ColumnRepository repository;
 
 
-    public void verifyColumn(ColumnRequest columnRequest) {
+    private void verifyColumn(ColumnRequest columnRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
         Columns columns = new Columns();
-
-        if (boardRepository.findById(columnRequest.getIdBoard()).isEmpty()) {
-            throw new NotFoundException(Board.class);
-        }
 
         modelUtil.map(columnRequest, columns);
         ErrorResponse error = modelUtil.validate(columns);
@@ -48,6 +45,7 @@ public class ColumnService {
 
 
     public Columns registerColumn(ColumnRequest columnRequest) {
+        verifyColumn(columnRequest);
         Optional<Board> board = boardRepository.findById(columnRequest.getIdBoard());
 
         if (board.isPresent()) {
@@ -71,6 +69,7 @@ public class ColumnService {
 
 
     public Columns editColumn(Integer idColumn, ColumnRequest columnRequest) {
+        verifyColumn(columnRequest);
         Columns columns = getColumn(idColumn);
         columns.setTitle(columnRequest.getTitle());
         return repository.save(columns);
@@ -98,6 +97,11 @@ public class ColumnService {
 
     public void deleteColumn(Integer idColumn) {
         Columns columns = getColumn(idColumn);
+        Optional<Board> board = boardRepository.findByColumnId(columns.getId());
+        if (board.isPresent()) {
+            board.get().getColumns().remove(board);
+            boardRepository.save(board.get());
+        }
         repository.deleteById(columns.getId());
     }
 

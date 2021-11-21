@@ -1,15 +1,16 @@
 package com.swl.service;
 
-import com.swl.exceptions.business.AlreadyExistsException;
 import com.swl.exceptions.business.EmptyException;
 import com.swl.exceptions.business.NotFoundException;
 import com.swl.models.management.Organization;
 import com.swl.models.management.Team;
 import com.swl.models.people.Client;
+import com.swl.models.people.Collaborator;
 import com.swl.models.project.Project;
 import com.swl.payload.request.ProjectRequest;
 import com.swl.repository.*;
 import com.swl.util.BuilderUtil;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,10 +21,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -182,7 +180,14 @@ public class ProjectServiceTest {
 
     @Test
     public void deleteProject_Sucessfully() {
-        Mockito.when(repository.existsById(1)).thenReturn(true);
+        Team team = BuilderUtil.buildTeam();
+        Project project = BuilderUtil.buildProject();
+        project.setId(1);
+        team.setProjects(new ArrayList<>(Collections.singletonList(project)));
+        List<Team> teamList = new ArrayList<>(Collections.singletonList(team));
+
+        Mockito.when(teamRepository.findAllByProjectId(1)).thenReturn(Optional.of(teamList));
+        Mockito.when(repository.findById(1)).thenReturn(Optional.of(project));
         service.deleteProject(1);
     }
 
@@ -293,9 +298,99 @@ public class ProjectServiceTest {
 
     @Test
     public void getAllProjectsByOrganization_Error() {
-        Mockito.when(teamService.getAllTeamByOrganization(1)).thenReturn(null);
+        thrownException.set(false);
+        try {
+            service.getAllProjectsByOrganization(1);
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+    }
 
-        var response = service.getAllProjectsByOrganization(1);
-        Assertions.assertNull(response);
+
+    @Test
+    public void getAllProjectsByClient_Sucessfully() {
+        Mockito.when(clientRepository.existsById(1)).thenReturn(true);
+        Mockito.when(repository.findAllByClientId(1)).thenReturn(Optional.of(
+                new ArrayList<>(Collections.singletonList(Mockito.mock(Project.class)))));
+
+        var response = service.getAllProjectsByClient(1);
+        Assertions.assertEquals(response.size(), 1);
+    }
+
+
+    @Test
+    public void getAllProjectsByClient_Error() {
+        Mockito.when(clientRepository.existsById(1)).thenReturn(false);
+        thrownException.set(false);
+        try {
+            service.getAllProjectsByClient(1);
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+    }
+
+
+    @Test
+    public void getAllProjectsByCollaborator_Sucessfully() {
+        Team team = BuilderUtil.buildTeam();
+        team.setProjects(new ArrayList<>(Collections.singletonList(Mockito.mock(Project.class))));
+        team.setId(1);
+        List<Team> teamList = new ArrayList<>(Collections.singletonList(team));
+
+        Mockito.when(collaboratorRepository.existsById(1)).thenReturn(true);
+        Mockito.when(teamRepository.findAllByCollaboratorId(1)).thenReturn(Optional.of(teamList));
+        Mockito.when(teamRepository.existsById(1)).thenReturn(true);
+        Mockito.when(teamRepository.findById(1)).thenReturn(Optional.ofNullable(teamList.get(0)));
+
+        var response = service.getAllProjectsByCollaborator(1);
+        Assertions.assertEquals(response.size(), 1);
+    }
+
+
+    @Test
+    public void getAllProjectsByCollaborator_Error() {
+        Mockito.when(collaboratorRepository.existsById(1)).thenReturn(false);
+
+        thrownException.set(false);
+        try {
+            service.getAllProjectsByCollaborator(1);
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
+    }
+
+
+    @Test
+    public void getAllProjectsByCollaboratorActual_Sucessfully() {
+        Collaborator collaborator = BuilderUtil.buildCollaborator();
+        collaborator.setId(1);
+
+        Team team = BuilderUtil.buildTeam();
+        team.setProjects(new ArrayList<>(Collections.singletonList(Mockito.mock(Project.class))));
+        team.setId(1);
+        List<Team> teamList = new ArrayList<>(Collections.singletonList(team));
+
+        Mockito.when(collaboratorRepository.existsById(1)).thenReturn(true);
+        Mockito.when(teamRepository.findAllByCollaboratorId(1)).thenReturn(Optional.of(teamList));
+        Mockito.when(teamRepository.existsById(1)).thenReturn(true);
+        Mockito.when(teamRepository.findById(1)).thenReturn(Optional.ofNullable(teamList.get(0)));
+
+        Mockito.when(userService.getCurrentUser()).thenReturn(Optional.of(collaborator));
+
+        var response = service.getAllProjectsByCollaboratorActual();
+        Assertions.assertEquals(response.size(), 1);
+    }
+
+
+    @Test
+    public void getAllProjectsByCollaboratorActual_Error() {
+        Mockito.when(userService.getCurrentUser()).thenReturn(Optional.empty());
+
+        thrownException.set(false);
+        try {
+            service.getAllProjectsByCollaboratorActual();
+        } catch (NotFoundException e) {
+            thrownException.set(true);
+        }
     }
 }

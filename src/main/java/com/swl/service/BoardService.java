@@ -4,6 +4,7 @@ import com.swl.exceptions.business.InvalidFieldException;
 import com.swl.exceptions.business.NotFoundException;
 import com.swl.models.enums.MessageEnum;
 import com.swl.models.management.Organization;
+import com.swl.models.management.Team;
 import com.swl.models.project.Board;
 import com.swl.models.project.Project;
 import com.swl.payload.request.BoardRequest;
@@ -34,13 +35,9 @@ public class BoardService {
     private final BoardRepository repository;
 
 
-    public void verifyBoard(BoardRequest boardRequest) {
+    private void verifyBoard(BoardRequest boardRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
         Board board = new Board();
-
-        if (projectRepository.findById(boardRequest.getIdProject()).isEmpty()) {
-            throw new NotFoundException(Project.class);
-        }
 
         modelUtil.map(boardRequest, board);
         ErrorResponse error = modelUtil.validate(board);
@@ -52,6 +49,8 @@ public class BoardService {
 
 
     public Board registerBoard(BoardRequest boardRequest) {
+        verifyBoard(boardRequest);
+
         Optional<Project> project = projectRepository.findById(boardRequest.getIdProject());
 
         if (project.isPresent()) {
@@ -74,13 +73,10 @@ public class BoardService {
 
 
     public Board editBoard(Integer idBoard, BoardRequest boardRequest) {
-        Optional<Board> boardAux = repository.findById(idBoard);
-
-        if (boardAux.isPresent()) {
-            boardAux.get().setTitle(boardRequest.getTitle());
-            return repository.save(boardAux.get());
-        }
-        throw new NotFoundException(Board.class);
+        verifyBoard(boardRequest);
+        Board boardAux = getBoard(idBoard);
+        boardAux.setTitle(boardRequest.getTitle());
+        return repository.save(boardAux);
     }
 
 
@@ -105,6 +101,11 @@ public class BoardService {
 
     public void deleteBoard(Integer idBoard) {
         Board board = getBoard(idBoard);
+        Optional<Project> project = projectRepository.findByBoardId(board.getId());
+        if (project.isPresent()) {
+            project.get().getBoards().remove(board);
+            projectRepository.save(project.get());
+        }
         repository.deleteById(board.getId());
     }
 

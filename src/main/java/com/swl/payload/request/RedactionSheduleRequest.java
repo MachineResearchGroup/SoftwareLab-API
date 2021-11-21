@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
 @Builder
 public class RedactionSheduleRequest {
 
-    private LocalDateTime initDate;
+    private String initDate;
 
-    private LocalDateTime endDate;
+    private String endDate;
 
     private Integer idProject;
 

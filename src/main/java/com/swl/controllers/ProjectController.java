@@ -80,7 +80,7 @@ public class ProjectController {
     @PostMapping("/addClientInProject/}")
     @Secured("ROLE_PMO")
     public ResponseEntity<?> addClientInProject(@RequestParam(name = "idProject") Integer idProject,
-                                                @RequestParam(name = "idClient") String clientEmail) {
+                                                @RequestParam(name = "clientEmail") String clientEmail) {
 
         service.addClientInProject(idProject, clientEmail);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.ADDED, Client.class));

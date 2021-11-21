@@ -8,6 +8,7 @@ import lombok.NonNull;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
@@ -19,7 +20,7 @@ public class TaskRequest {
     @Size(max = 500)
     private String description;
 
-    private LocalDate endDate;
+    private String endDate;
 
     private Integer priority;
 
@@ -29,5 +30,9 @@ public class TaskRequest {
 
     private Integer idSuperTask;
 
+    private Integer idHistory;
+
     private Integer idColumn;
+
+    private List<Integer> idCollaborators;
 }

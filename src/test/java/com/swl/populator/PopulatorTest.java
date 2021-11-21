@@ -68,9 +68,8 @@ public class PopulatorTest {
                 .rangeNumberEventsByProject(new int[]{2, 5})
                 .build();
 
-        populatorRequirement.saveAll();
-
-        populatorOrganization.save(populatorConfig);
+//        populatorRequirement.saveAll();
+//        populatorOrganization.save(populatorConfig);
     }
 
 }

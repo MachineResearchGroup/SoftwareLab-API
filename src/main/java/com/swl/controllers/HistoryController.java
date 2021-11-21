@@ -4,10 +4,8 @@ import com.swl.config.swagger.ApiRoleAccessNotes;
 import com.swl.models.enums.MessageEnum;
 import com.swl.models.project.History;
 import com.swl.payload.request.HistoryRequest;
-import com.swl.payload.request.TaskRequest;
 import com.swl.payload.response.MessageResponse;
 import com.swl.service.HistoryService;
-import com.swl.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,15 +13,14 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/project/board/column/history")
+@RequestMapping("/history")
 @RequiredArgsConstructor
 public class HistoryController {
-
-    private final TaskService taskService;
 
     private final HistoryService service;
 
@@ -34,7 +31,6 @@ public class HistoryController {
     @Secured({"ROLE_DEV", "ROLE_PO"})
     public ResponseEntity<?> registerHistory(@RequestBody HistoryRequest historyRequest) {
 
-        service.verifyHistory(historyRequest);
         History history = service.registerHistory(historyRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, history));
 
@@ -47,7 +43,6 @@ public class HistoryController {
     @Secured({"ROLE_DEV", "ROLE_PO"})
     public ResponseEntity<?> editHistory(@PathVariable("idHistory") Integer idHistory, @RequestBody HistoryRequest historyRequest) {
 
-        service.verifyHistory(historyRequest);
         History editHistory = service.editHistory(idHistory, historyRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.EDITED, editHistory));
 
@@ -68,25 +63,28 @@ public class HistoryController {
 
     @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/all/{idColumn}")
+    @GetMapping("/")
     @Secured({"ROLE_DEV", "ROLE_PO", "ROLE_PMO"})
-    public ResponseEntity<?> getAllByColumns(@PathVariable(value = "idColumn") Integer idColumn) {
+    public ResponseEntity<?> getAllHistories(@RequestParam(value = "idColumn", required = false) Integer idColumn,
+                                             @RequestParam(value = "idCollaborator", required = false) Integer idCollaborator) {
 
-        List<History> histories = service.getAllHistoryByColumn(idColumn);
+
+        List<History> histories;
+
+        if (!Objects.isNull(idColumn)) {
+            histories = service.getAllHistoryByColumn(idColumn);
+
+        } else if (!Objects.isNull(idCollaborator)) {
+            histories = service.getAllHistoriesByCollaborator(idCollaborator);
+
+        } else {
+            histories = service.getAllHistoriesByCollaboratorActual();
+        }
+
+        if (histories.isEmpty()) {
+            return ResponseEntity.ok(new MessageResponse(MessageEnum.EMPTY, History.class, histories));
+        }
         return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, histories));
-
-    }
-
-
-    @ApiRoleAccessNotes
-    @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/{idHistory}/addTask")
-    @Secured({"ROLE_DEV", "ROLE_PO"})
-    public ResponseEntity<?> addTask(@PathVariable("idHistory") Integer idHistory, @RequestBody TaskRequest taskRequest) {
-
-        taskService.verifyTask(taskRequest);
-        History history = service.addTask(idHistory, taskRequest);
-        return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, history));
 
     }
 

@@ -1,6 +1,7 @@
 package com.swl.models.project;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.swl.models.people.Collaborator;
 import lombok.*;
 
 import javax.persistence.*;
@@ -30,11 +31,13 @@ public class History extends Item{
     @ManyToOne
     private Columns column;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "history")
     private List<Task> tasks;
 
     @ManyToMany
     private List<Label> labels;
+
+    @ManyToMany
+    private List<Collaborator> collaborators;
 
 }

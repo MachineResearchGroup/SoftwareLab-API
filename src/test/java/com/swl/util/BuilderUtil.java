@@ -3,11 +3,13 @@ package com.swl.util;
 import com.swl.models.management.Address;
 import com.swl.models.management.Organization;
 import com.swl.models.management.Team;
-import com.swl.models.project.Project;
+import com.swl.models.project.*;
 import com.swl.models.people.Client;
 import com.swl.models.people.Collaborator;
 import com.swl.models.people.User;
+import com.swl.service.RequirementService;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -81,4 +83,57 @@ public class BuilderUtil {
                 .repository("/git/project/")
                 .build();
     }
+
+
+    public static Board buildBoard() {
+        return Board.builder()
+                .title("Board Teste")
+                .build();
+    }
+
+
+    public static Columns buildColumn() {
+        return Columns.builder()
+                .title("Column Teste")
+                .build();
+    }
+
+
+    public static History buildHistory() {
+        History history = new History();
+        history.setTitle("History teste");
+        history.setDescription("Descricao");
+        history.setEndDate(LocalDate.now());
+        history.setPriority(1);
+        history.setWeight(1);
+        return history;
+    }
+
+
+    public static Task buildTask() {
+        Task task = new Task();
+        task.setTitle("History teste");
+        task.setDescription("Descricao");
+        task.setEndDate(LocalDate.now());
+        task.setPriority(1);
+        task.setEstimate(1);
+        task.setDuration(1);
+        return task;
+    }
+
+
+    public static Redaction buildRedaction() {
+        return Redaction.builder()
+                .description("Como cliente eu quero...")
+                .build();
+    }
+
+
+    public static Requirement buildRequirement() {
+        return Requirement.builder()
+                .category("F")
+                .description("O sistema deve fazer algo importante..")
+                .build();
+    }
+
 }

@@ -13,6 +13,14 @@ import java.util.Optional;
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Integer> {
 
-    @Query(nativeQuery = true, value = "select * from project p join project_clients pc on clients_id =:idClient")
+    @Query(nativeQuery = true, value = "select * from project p join project_clients pc on clients_id =:idClient " +
+            "where p.id = pc.project_id")
     Optional<List<Project>> findAllByClientId(@Param("idClient") Integer idClient);
+
+    @Query(value = "select p from Project p join Board b on b.id =:idBoard where p.id = b.project.id")
+    Optional<Project> findByBoardId(@Param("idBoard") Integer idBoard);
+
+    @Query(nativeQuery = true, value = "select * from project p join project_requirements pr on pr.requirements_id =:idRequirement " +
+            "where p.id = pr.project_id")
+    Optional<List<Project>> findAllByRequirementId(@Param("idRequirement") Integer idRequirement);
 }

@@ -2,9 +2,9 @@ package com.swl.controllers;
 
 import com.swl.config.swagger.ApiRoleAccessNotes;
 import com.swl.models.enums.MessageEnum;
-import com.swl.models.management.Organization;
 import com.swl.models.management.Team;
 import com.swl.models.people.Collaborator;
+import com.swl.payload.request.CollaboratorRequest;
 import com.swl.payload.request.TeamRequest;
 import com.swl.payload.response.MessageResponse;
 import com.swl.service.TeamService;
@@ -32,7 +32,6 @@ public class TeamController {
     @Secured({"ROLE_PO", "ROLE_PMO"})
     public ResponseEntity<?> registerTeam(@RequestBody TeamRequest teamRequest) {
 
-        service.verifyTeam(teamRequest);
         Team team = service.registerTeam(teamRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, team));
 
@@ -45,7 +44,6 @@ public class TeamController {
     @Secured({"ROLE_PO", "ROLE_PMO"})
     public ResponseEntity<?> editTeam(@PathVariable("idTeam") Integer idTeam, @RequestBody TeamRequest teamRequest) {
 
-        service.verifyTeam(teamRequest);
         Team editTeam = service.editTeam(idTeam, teamRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.EDITED, editTeam));
 
@@ -80,9 +78,10 @@ public class TeamController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/collaborators/{idTeam}")
     @Secured({"ROLE_PO", "ROLE_PMO"})
-    public ResponseEntity<?> addCollaborator(@PathVariable("idTeam") Integer idTeam, @RequestBody List<String> emails) {
+    public ResponseEntity<?> addCollaborator(@PathVariable("idTeam") Integer idTeam,
+                                             @RequestBody List<CollaboratorRequest> collaboratorRequests) {
 
-        List<Collaborator> collaboratorList = service.addCollaborator(idTeam, emails);
+        List<Collaborator> collaboratorList = service.addCollaborator(idTeam, collaboratorRequests);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.ADDED, collaboratorList));
 
     }
@@ -95,7 +94,7 @@ public class TeamController {
     public ResponseEntity<?> getCollaborators(@PathVariable("idTeam") Integer idTeam) {
 
         List<Collaborator> collaborators = service.getCollaborators(idTeam);
-        if(collaborators.isEmpty()){
+        if (collaborators.isEmpty()) {
             return ResponseEntity.ok(new MessageResponse(MessageEnum.EMPTY, Collaborator.class, collaborators));
         }
         return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, collaborators));
@@ -122,7 +121,7 @@ public class TeamController {
     public ResponseEntity<?> getAllTeamByOrganization(@PathVariable("idOrg") Integer idOrg) {
 
         List<Team> teams = service.getAllTeamByOrganization(idOrg);
-        if(teams.isEmpty()){
+        if (teams.isEmpty()) {
             return ResponseEntity.ok(new MessageResponse(MessageEnum.EMPTY, Team.class, teams));
         }
         return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, teams));
@@ -137,7 +136,7 @@ public class TeamController {
     public ResponseEntity<?> getTeamsByCollaborator() {
 
         List<Team> teams = service.getTeamsByCollaborator();
-        if(teams.isEmpty()){
+        if (teams.isEmpty()) {
             return ResponseEntity.ok(new MessageResponse(MessageEnum.EMPTY, Team.class, teams));
         }
         return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, teams));

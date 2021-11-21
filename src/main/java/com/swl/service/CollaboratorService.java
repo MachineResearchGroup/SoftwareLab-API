@@ -24,7 +24,8 @@ public class CollaboratorService {
     public Collaborator getCollaborator() {
 
         if (userService.getCurrentUser().isPresent() && userService.getCurrentUser().get() instanceof Collaborator) {
-            Optional<Collaborator> collaborator = repository.findCollaboratorByUserId(((Collaborator) userService.getCurrentUser().get()).getId());
+            Optional<Collaborator> collaborator = repository.findCollaboratorByUserId(((Collaborator)
+                    userService.getCurrentUser().get()).getUser().getId());
             return collaborator.get();
         }
 

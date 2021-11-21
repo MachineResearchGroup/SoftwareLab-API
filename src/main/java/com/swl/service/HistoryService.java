@@ -2,6 +2,7 @@ package com.swl.service;
 
 import com.swl.exceptions.business.InvalidFieldException;
 import com.swl.exceptions.business.NotFoundException;
+import com.swl.models.people.Collaborator;
 import com.swl.models.project.Board;
 import com.swl.models.project.Columns;
 import com.swl.models.project.History;
@@ -9,6 +10,7 @@ import com.swl.models.project.Task;
 import com.swl.payload.request.HistoryRequest;
 import com.swl.payload.request.TaskRequest;
 import com.swl.payload.response.ErrorResponse;
+import com.swl.repository.CollaboratorRepository;
 import com.swl.repository.ColumnRepository;
 import com.swl.repository.HistoryRepository;
 import com.swl.repository.TaskRepository;
@@ -18,10 +20,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 
 @Service
@@ -32,18 +34,28 @@ public class HistoryService {
     private final ColumnRepository columnRepository;
 
     @Autowired
-    private final TaskRepository taskRepository;
+    private final CollaboratorRepository collaboratorRepository;
+
+    @Autowired
+    private final UserService userService;
 
     @Autowired
     private final HistoryRepository repository;
 
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    public void verifyHistory(HistoryRequest historyRequest) {
+    private void verifyHistory(HistoryRequest historyRequest) {
+        formatter = formatter.withLocale(Locale.US);
+
         ModelUtil modelUtil = ModelUtil.getInstance();
         History history = new History();
 
-        if (columnRepository.findById(historyRequest.getIdColumn()).isEmpty()) {
-            throw new NotFoundException(Columns.class);
+        try {
+            LocalDate formattedData = LocalDate.parse(historyRequest.getEndDate(), formatter);
+        } catch (Exception parseException) {
+            throw new InvalidFieldException(ErrorResponse.builder()
+                    .key("endDate")
+                    .build());
         }
 
         modelUtil.map(historyRequest, history);
@@ -57,22 +69,35 @@ public class HistoryService {
 
 
     public History registerHistory(HistoryRequest historyRequest) {
-        ModelUtil modelUtil = ModelUtil.getInstance();
+        verifyHistory(historyRequest);
+
+        LocalDate formattedData = LocalDate.parse(historyRequest.getEndDate(), formatter);
+        historyRequest.setEndDate(null);
+
         Optional<Columns> column = columnRepository.findById(historyRequest.getIdColumn());
 
         if (column.isPresent()) {
-            History history = new History();
-            modelUtil.map(historyRequest, history);
-            history.setColumn(column.get());
+            List<Collaborator> collaborators = collaboratorRepository.findAllById(historyRequest.getIdCollaborators());
+            if (!collaborators.isEmpty()) {
+                History history = new History();
+                CopyUtil.copyProperties(historyRequest, history);
 
-            history = repository.save(history);
+                history.setColumn(column.get());
+                history.setEndDate(formattedData);
+                history.setCollaborators(collaborators);
+                history = repository.save(history);
 
-            if (Objects.isNull(column.get().getHistories()))
-                column.get().setHistories(new ArrayList<>());
-            column.get().getHistories().add(history);
+                if (Objects.isNull(column.get().getHistories()))
+                    column.get().setHistories(new ArrayList<>());
+                column.get().getHistories().add(history);
 
-            columnRepository.save(column.get());
-            return history;
+
+
+                columnRepository.save(column.get());
+                return history;
+            }else{
+                throw new NotFoundException(Collaborator.class);
+            }
         } else {
             throw new NotFoundException(Columns.class);
         }
@@ -80,6 +105,7 @@ public class HistoryService {
 
 
     public History editHistory(Integer idHistory, HistoryRequest historyRequest) {
+        verifyHistory(historyRequest);
         History historyAux = getHistory(idHistory);
         CopyUtil.copyProperties(historyRequest, historyAux);
         return repository.save(historyAux);
@@ -105,26 +131,30 @@ public class HistoryService {
     }
 
 
-    public History addTask(Integer idHistory, TaskRequest taskRequest) {
-        ModelUtil modelUtil = ModelUtil.getInstance();
-        History history = getHistory(idHistory);
+    public List<History> getAllHistoriesByCollaborator(Integer idCollaborator) {
+        Optional<Collaborator> collaborator = collaboratorRepository.findById(idCollaborator);
+        if (collaborator.isPresent()) {
+            return repository.findAllByCollaboratorId(idCollaborator).orElseGet(ArrayList::new);
+        }
+        throw new NotFoundException(Collaborator.class);
+    }
 
-        Task task = new Task();
-        modelUtil.map(taskRequest, task);
 
-        task = taskRepository.save(task);
-
-        if (Objects.isNull(history.getTasks()))
-            history.setTasks(new ArrayList<>());
-        history.getTasks().add(task);
-
-        return repository.save(history);
-
+    public List<History> getAllHistoriesByCollaboratorActual() {
+        if (userService.getCurrentUser().isPresent() && userService.getCurrentUser().get() instanceof Collaborator) {
+            return getAllHistoriesByCollaborator(((Collaborator) userService.getCurrentUser().get()).getId());
+        }
+        throw new NotFoundException(Collaborator.class);
     }
 
 
     public void deleteHistory(Integer idHistory) {
         History history = getHistory(idHistory);
+        Optional<Columns> columns = columnRepository.findByHistoryId(history.getId());
+        if (columns.isPresent()) {
+            columns.get().getHistories().remove(history);
+            columnRepository.save(columns.get());
+        }
         repository.deleteById(history.getId());
     }
 

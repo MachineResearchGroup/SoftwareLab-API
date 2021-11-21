@@ -1,7 +1,6 @@
 package com.swl.service;
 
 import com.swl.exceptions.business.BlockedAdditionException;
-import com.swl.exceptions.business.InvalidFieldException;
 import com.swl.exceptions.business.NotFoundException;
 import com.swl.models.people.Client;
 import com.swl.models.project.Board;
@@ -9,13 +8,11 @@ import com.swl.models.project.Project;
 import com.swl.models.project.Redaction;
 import com.swl.models.project.RedactionShedule;
 import com.swl.payload.request.RedactionRequest;
-import com.swl.payload.response.ErrorResponse;
 import com.swl.repository.ClientRepository;
 import com.swl.repository.ProjectRepository;
 import com.swl.repository.RedactionRepository;
 import com.swl.repository.RedactionSheduleRepository;
 import com.swl.util.CopyUtil;
-import com.swl.util.ModelUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,29 +41,7 @@ public class RedactionService {
     private final RedactionRepository repository;
 
 
-    public void verifyRedaction(RedactionRequest redactionRequest) {
-        ModelUtil modelUtil = ModelUtil.getInstance();
-        Redaction redaction = new Redaction();
-
-        if (projectRepository.findById(redactionRequest.getIdProject()).isEmpty()) {
-            throw new NotFoundException(Project.class);
-        }
-
-        if (clientRepository.findById(redactionRequest.getIdClient()).isEmpty()) {
-            throw new NotFoundException(Client.class);
-        }
-
-        modelUtil.map(redactionRequest, redaction);
-        ErrorResponse error = modelUtil.validate(redaction);
-
-        if (!Objects.isNull(error)) {
-            throw new InvalidFieldException(error);
-        }
-    }
-
-
     public Redaction registerRedaction(RedactionRequest redactionRequest) {
-        ModelUtil modelUtil = ModelUtil.getInstance();
         Optional<Project> project = projectRepository.findById(redactionRequest.getIdProject());
         Optional<Client> client = clientRepository.findById(redactionRequest.getIdClient());
 
@@ -80,17 +55,20 @@ public class RedactionService {
 
         Optional<RedactionShedule> redactionShedule = redactionSheduleRepository.findByProjectId(project.get().getId());
 
-        if (redactionShedule.isPresent() && verifyShedule(redactionShedule.get())) {
+        if (redactionShedule.isPresent()) {
+            LocalDateTime date = verifyShedule(redactionShedule.get());
+            if (!Objects.isNull(date)) {
+                Redaction redaction = new Redaction();
+                CopyUtil.copyProperties(redactionRequest, redaction);
+                redaction.setProject(project.get());
+                redaction.setClient(client.get());
+                redaction.setDate(LocalDateTime.now());
 
-            Redaction redaction = new Redaction();
-            modelUtil.map(redactionRequest, redaction);
-            redaction.setProject(project.get());
-            redaction.setClient(client.get());
-
-            return repository.save(redaction);
-        } else {
-            throw new BlockedAdditionException(Redaction.class);
+                return repository.save(redaction);
+            }
         }
+
+        throw new BlockedAdditionException(Redaction.class);
     }
 
 
@@ -100,12 +78,15 @@ public class RedactionService {
         Optional<RedactionShedule> redactionShedule = redactionSheduleRepository.findByProjectId(redactionAux
                 .getProject().getId());
 
-        if (redactionShedule.isPresent() && verifyShedule(redactionShedule.get())) {
-            CopyUtil.copyProperties(redactionRequest, redactionAux);
-            return repository.save(redactionAux);
-        } else {
-            throw new BlockedAdditionException(Redaction.class);
+        if (redactionShedule.isPresent()) {
+            LocalDateTime date = verifyShedule(redactionShedule.get());
+            if (!Objects.isNull(date)) {
+                CopyUtil.copyProperties(redactionRequest, redactionAux);
+                return repository.save(redactionAux);
+            }
         }
+
+        throw new BlockedAdditionException(Redaction.class);
     }
 
 
@@ -129,8 +110,8 @@ public class RedactionService {
 
 
     public List<Redaction> getAllRedactionByClient(Integer idClient) {
-        Optional<Client> project = clientRepository.findById(idClient);
-        if (project.isPresent()) {
+        Optional<Client> client = clientRepository.findById(idClient);
+        if (client.isPresent()) {
             return repository.findAllByClientId(idClient).orElseGet(ArrayList::new);
         }
         throw new NotFoundException(Client.class);
@@ -143,9 +124,10 @@ public class RedactionService {
     }
 
 
-    private boolean verifyShedule(RedactionShedule redactionShedule) {
+    private LocalDateTime verifyShedule(RedactionShedule redactionShedule) {
         LocalDateTime now = LocalDateTime.now();
-        return now.isAfter(redactionShedule.getInitDate()) && now.isBefore(redactionShedule.getEndDate());
+        return now.isAfter(redactionShedule.getInitDate()) && now.isBefore(redactionShedule.getEndDate())
+                ? now : null;
     }
 
 }

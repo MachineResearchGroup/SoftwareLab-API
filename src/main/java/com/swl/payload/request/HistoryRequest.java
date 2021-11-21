@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NonNull;
 
 import javax.validation.constraints.Size;
-import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
@@ -18,11 +18,13 @@ public class HistoryRequest {
     @Size(max = 500)
     private String description;
 
-    private LocalDate endDate;
+    private String endDate;
 
     private Integer priority;
 
     private Integer weight;
 
     private Integer idColumn;
+
+    private List<Integer> idCollaborators;
 }

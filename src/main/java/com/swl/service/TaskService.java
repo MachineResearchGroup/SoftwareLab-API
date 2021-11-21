@@ -2,22 +2,25 @@ package com.swl.service;
 
 import com.swl.exceptions.business.InvalidFieldException;
 import com.swl.exceptions.business.NotFoundException;
-import com.swl.models.enums.MessageEnum;
+import com.swl.models.people.Collaborator;
 import com.swl.models.project.Board;
 import com.swl.models.project.Columns;
+import com.swl.models.project.History;
 import com.swl.models.project.Task;
 import com.swl.payload.request.TaskRequest;
 import com.swl.payload.response.ErrorResponse;
-import com.swl.payload.response.MessageResponse;
+import com.swl.repository.CollaboratorRepository;
 import com.swl.repository.ColumnRepository;
+import com.swl.repository.HistoryRepository;
 import com.swl.repository.TaskRepository;
 import com.swl.util.CopyUtil;
 import com.swl.util.ModelUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -32,43 +35,84 @@ public class TaskService {
     private final ColumnRepository columnRepository;
 
     @Autowired
+    private final HistoryRepository historyRepository;
+
+    @Autowired
+    private final CollaboratorRepository collaboratorRepository;
+
+    @Autowired
+    private final UserService userService;
+
+    @Autowired
     private final TaskRepository repository;
 
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    public void verifyTask(TaskRequest taskRequest) {
+    private void verifyTask(TaskRequest taskRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
         Task task = new Task();
 
-        if (columnRepository.findById(taskRequest.getIdColumn()).isEmpty()) {
-            throw new NotFoundException(Columns.class);
+        try {
+            LocalDate formattedData = LocalDate.parse(taskRequest.getEndDate(), formatter);
+        } catch (Exception parseException) {
+            throw new InvalidFieldException(ErrorResponse.builder()
+                    .key("endDate")
+                    .build());
         }
 
-        modelUtil.map(taskRequest, task);
-        ErrorResponse error = modelUtil.validate(task);
-
-        if (!Objects.isNull(error)) {
-            throw new InvalidFieldException(error);
-        }
+//        CopyUtil.copyProperties(taskRequest, task);
+//        ErrorResponse error = modelUtil.validate(task);
+//
+//        if (!Objects.isNull(error)) {
+//            throw new InvalidFieldException(error);
+//        }
     }
 
 
     public Task registerTask(TaskRequest taskRequest) {
-        ModelUtil modelUtil = ModelUtil.getInstance();
+        verifyTask(taskRequest);
+        LocalDate formattedData = LocalDate.parse(taskRequest.getEndDate(), formatter);
+        taskRequest.setEndDate(null);
+
         Optional<Columns> column = columnRepository.findById(taskRequest.getIdColumn());
 
         if (column.isPresent()) {
-            Task task = new Task();
-            modelUtil.map(taskRequest, task);
-            task.setColumn(column.get());
+            List<Collaborator> collaborator = collaboratorRepository.findAllById(taskRequest.getIdCollaborators());
+            if (!collaborator.isEmpty()) {
 
-            task = repository.save(task);
+                Task task = new Task();
+                CopyUtil.copyProperties(taskRequest, task);
+                task.setColumn(column.get());
+                task.setEndDate(formattedData);
+                task.setCollaborators(collaborator);
 
-            if (Objects.isNull(column.get().getTasks()))
-                column.get().setTasks(new ArrayList<>());
-            column.get().getTasks().add(task);
+                task = repository.save(task);
 
-            columnRepository.save(column.get());
-            return task;
+                if (Objects.isNull(column.get().getTasks()))
+                    column.get().setTasks(new ArrayList<>());
+                column.get().getTasks().add(task);
+
+                if (!Objects.isNull(taskRequest.getIdHistory())) {
+                    Optional<History> history = historyRepository.findById(taskRequest.getIdHistory());
+                    if (history.isPresent()) {
+                        if (Objects.isNull(history.get().getTasks()))
+                            history.get().setTasks(new ArrayList<>());
+                        history.get().getTasks().add(task);
+                        historyRepository.save(history.get());
+                        task.setHistory(history.get());
+                    } else {
+                        throw new NotFoundException(History.class);
+                    }
+                } else if (!Objects.isNull(taskRequest.getIdSuperTask())) {
+                    Task superTask = getTask(taskRequest.getIdSuperTask());
+                    task.setSuperTask(superTask);
+                }
+
+                columnRepository.save(column.get());
+                return repository.save(task);
+            } else {
+                throw new NotFoundException(Collaborator.class);
+            }
         } else {
             throw new NotFoundException(Columns.class);
         }
@@ -87,7 +131,7 @@ public class TaskService {
         if (tasks.isPresent()) {
             return tasks.get();
         } else {
-            throw new NotFoundException(Board.class);
+            throw new NotFoundException(Task.class);
         }
     }
 
@@ -101,10 +145,34 @@ public class TaskService {
     }
 
 
+    public List<Task> getAllTaskByHistory(Integer idHistory) {
+        Optional<History> history = historyRepository.findById(idHistory);
+        if (history.isPresent()) {
+            return repository.findAllByHistoryId(idHistory).orElseGet(ArrayList::new);
+        }
+        throw new NotFoundException(History.class);
+    }
+
+
+    public List<Task> getAllTaskByCollaborator(Integer idCollaborator) {
+        Optional<Collaborator> collaborator = collaboratorRepository.findById(idCollaborator);
+        if (collaborator.isPresent()) {
+            return repository.findAllByCollaboratorId(idCollaborator).orElseGet(ArrayList::new);
+        }
+        throw new NotFoundException(Collaborator.class);
+    }
+
+
+    public List<Task> getAllTaskByCollaboratorActual() {
+        if (userService.getCurrentUser().isPresent() && userService.getCurrentUser().get() instanceof Collaborator) {
+            return getAllTaskByCollaborator(((Collaborator) userService.getCurrentUser().get()).getId());
+        }
+        throw new NotFoundException(Collaborator.class);
+    }
+
+
     public void deleteTask(Integer idTask) {
         Task task = getTask(idTask);
         repository.deleteById(task.getId());
     }
-
-
 }

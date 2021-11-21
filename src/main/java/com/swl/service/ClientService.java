@@ -23,9 +23,9 @@ public class ClientService {
 
     public Client getClient() {
 
-        if (userService.getCurrentUser().isPresent() && userService.getCurrentUser().get() instanceof Collaborator) {
-            Optional<Client> collaborator = repository.findClientByUserId(((Collaborator) userService.getCurrentUser().get()).getId());
-            return collaborator.get();
+        if (userService.getCurrentUser().isPresent() && userService.getCurrentUser().get() instanceof Client) {
+            Optional<Client> client = repository.findClientByUserId(((Client) userService.getCurrentUser().get()).getUser().getId());
+            return client.get();
         }
 
         throw new NotFoundException(Client.class);

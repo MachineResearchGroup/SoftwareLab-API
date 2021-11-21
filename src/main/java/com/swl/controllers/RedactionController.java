@@ -1,6 +1,7 @@
 package com.swl.controllers;
 
 import com.swl.config.swagger.ApiRoleAccessNotes;
+import com.swl.exceptions.business.InvalidRequestException;
 import com.swl.models.enums.MessageEnum;
 import com.swl.models.project.Redaction;
 import com.swl.models.project.RedactionShedule;
@@ -22,7 +23,7 @@ import java.util.Objects;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/project/redaction")
+@RequestMapping("/redaction")
 @RequiredArgsConstructor
 public class RedactionController {
 
@@ -37,7 +38,6 @@ public class RedactionController {
     @Secured({"ROLE_PMO", "ROLE_PO"})
     public ResponseEntity<?> registerRedactionShedule(@RequestBody RedactionSheduleRequest redactionRequest) {
 
-        sheduleService.verifyRedactionSheduled(redactionRequest);
         RedactionShedule redaction = sheduleService.registerRedactionShedule(redactionRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, redaction));
 
@@ -46,13 +46,54 @@ public class RedactionController {
 
     @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.CREATED)
+    @PutMapping("/shedule/{idRedactionShedule}")
+    @Secured({"ROLE_PMO", "ROLE_PO"})
+    public ResponseEntity<?> editRedactionShedule(@PathVariable("idRedactionShedule") Integer idRedactionShedule, @RequestBody RedactionSheduleRequest redactionRequest) {
+
+        RedactionShedule redaction = sheduleService.editRedactionShedule(idRedactionShedule, redactionRequest);
+        return ResponseEntity.ok(new MessageResponse(MessageEnum.EDITED, redaction));
+
+    }
+
+
+    @ApiRoleAccessNotes
+    @ResponseStatus(HttpStatus.CREATED)
+    @GetMapping("/shedule/{idRedactionShedule}")
+    @Secured({"ROLE_PMO", "ROLE_PO"})
+    public ResponseEntity<?> getRedactionShedule(@PathVariable(value = "idRedactionShedule") Integer idRedactionShedule) {
+
+        RedactionShedule redaction = sheduleService.getRedactionShedule(idRedactionShedule);
+        if (Objects.isNull(redaction)) {
+            return ResponseEntity.ok(new MessageResponse(MessageEnum.EMPTY, RedactionShedule.class, redaction));
+        }
+        return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, redaction));
+
+    }
+
+
+    @ApiRoleAccessNotes
+    @ResponseStatus(HttpStatus.CREATED)
     @GetMapping("/shedule/{idProject}")
     @Secured({"ROLE_PMO", "ROLE_PO"})
-    public ResponseEntity<?> getRedactionShedule(@PathVariable("idProject") Integer idProject) {
+    public ResponseEntity<?> getRedactionSheduleByProject(@PathVariable(value = "idProject", required = false) Integer idProject) {
+
+        RedactionShedule redaction = sheduleService.getRedactionSheduleByProject(idProject);
+        if (Objects.isNull(redaction)) {
+            return ResponseEntity.ok(new MessageResponse(MessageEnum.EMPTY, RedactionShedule.class, redaction));
+        }
+        return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, redaction));
+
+    }
 
 
-        RedactionShedule redaction = sheduleService.getRedactionShedule(idProject);
-        return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, redaction));
+    @ApiRoleAccessNotes
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("/shedule/{idRedactionShedule}")
+    @Secured({"ROLE_PO", "ROLE_PMO"})
+    public ResponseEntity<?> deleteRedactionShedule(@PathVariable("idRedactionShedule") Integer idRedactionShedule) {
+
+        sheduleService.deleteRedactionShedule(idRedactionShedule);
+        return ResponseEntity.ok(new MessageResponse(MessageEnum.DELETED, RedactionShedule.class));
 
     }
 
@@ -63,7 +104,6 @@ public class RedactionController {
     @Secured({"ROLE_CLIENT", "ROLE_PO"})
     public ResponseEntity<?> registerRedaction(@RequestBody RedactionRequest redactionRequest) {
 
-        service.verifyRedaction(redactionRequest);
         Redaction redaction = service.registerRedaction(redactionRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, redaction));
 
@@ -76,7 +116,6 @@ public class RedactionController {
     @Secured({"ROLE_CLIENT", "ROLE_PO"})
     public ResponseEntity<?> editRedaction(@PathVariable("idRedaction") Integer idRedaction, @RequestBody RedactionRequest redactionRequest) {
 
-        service.verifyRedaction(redactionRequest);
         Redaction editRedaction = service.editRedaction(idRedaction, redactionRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.EDITED, editRedaction));
 
@@ -87,15 +126,21 @@ public class RedactionController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/")
     @Secured({"ROLE_CLIENT", "ROLE_PO"})
-    public ResponseEntity<?> getAllRedactions(@RequestParam(value = "idProject", required = false) Integer idProject,
-                                              @RequestParam(value = "idClient", required = false) Integer idClient) {
+    public ResponseEntity<?> getRedactions(@RequestParam(value = "idProject", required = false) Integer idProject,
+                                           @RequestParam(value = "idClient", required = false) Integer idClient) {
 
-        List<Redaction> redactions = new ArrayList<>();
+        List<Redaction> redactions;
 
         if (!Objects.isNull(idProject)) {
             redactions = service.getAllRedactionByProject(idProject);
         } else if (!Objects.isNull(idClient)) {
-            redactions = service.getAllRedactionByClient(idProject);
+            redactions = service.getAllRedactionByClient(idClient);
+        }else{
+            throw new InvalidRequestException("no parameters added");
+        }
+
+        if (redactions.isEmpty()) {
+            return ResponseEntity.ok(new MessageResponse(MessageEnum.EMPTY, Redaction.class, redactions));
         }
 
         return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, redactions));

@@ -7,6 +7,7 @@ import com.swl.models.people.Collaborator;
 import com.swl.payload.response.MessageResponse;
 import com.swl.service.ClientService;
 import com.swl.service.CollaboratorService;
+import com.swl.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,8 @@ public class PeopleController {
     private final CollaboratorService collaboratorService;
 
     private final ClientService clientService;
+
+    private final UserService userService;
 
 
     @ApiRoleAccessNotes
@@ -45,6 +48,18 @@ public class PeopleController {
 
         Client client = clientService.getClient();
         return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, client));
+
+    }
+
+
+    @ApiRoleAccessNotes
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/user")
+    @Secured({"ROLE_USER", "ROLE_PO", "ROLE_PMO", "ROLE_DEV", "ROLE_CLIENT"})
+    public ResponseEntity<?> getUserByEmail(@RequestParam(value = "email") String email) {
+
+        Object user = userService.getUserByEmail(email);
+        return ResponseEntity.ok(new MessageResponse(MessageEnum.FOUND, user));
 
     }
 

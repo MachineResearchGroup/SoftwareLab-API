@@ -8,6 +8,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -28,7 +29,7 @@ public class Redaction {
     private String description;
 
     @NotNull
-    private LocalDate date;
+    private LocalDateTime date;
 
     @NotNull
     @JsonIgnore

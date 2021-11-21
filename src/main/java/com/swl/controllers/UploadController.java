@@ -41,7 +41,7 @@ public class UploadController {
             service.uploadImageOfTeam(imageFile, idTeam);
 
         } else if (!Objects.isNull(idProject)) {
-            service.uploadImageOfOrganization(imageFile, idProject);
+            service.uploadImageOfProject(imageFile, idProject);
 
         } else if (!Objects.isNull(idUser)) {
             service.uploadImageOfUser(imageFile, idUser);
