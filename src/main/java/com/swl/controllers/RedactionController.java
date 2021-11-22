@@ -73,7 +73,7 @@ public class RedactionController {
 
     @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.CREATED)
-    @GetMapping("/shedule/{idProject}")
+    @GetMapping("/shedule/project/{idProject}")
     @Secured({"ROLE_PMO", "ROLE_PO"})
     public ResponseEntity<?> getRedactionSheduleByProject(@PathVariable(value = "idProject", required = false) Integer idProject) {
 

@@ -91,7 +91,7 @@ public class ProjectController {
     @ApiRoleAccessNotes
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/")
-    @Secured({"ROLE_DEV", "ROLE_PO", "ROLE_PMO"})
+    @Secured({"ROLE_DEV", "ROLE_PO", "ROLE_PMO", "ROLE_CLIENT"})
     public ResponseEntity<?> getAllProjects(@RequestParam(value = "idTeam", required = false) Integer idTeam,
                                             @RequestParam(value = "idOrganization", required = false) Integer idOrganization,
                                             @RequestParam(value = "idCollaborator", required = false) Integer idCollaborator,
