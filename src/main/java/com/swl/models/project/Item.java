@@ -17,9 +17,10 @@ import java.time.LocalDate;
 public class Item {
 
     @NotNull
+    @Size(max = 500)
     private String title;
 
-    @Size(max = 500)
+    @Size(max = 1000)
     private String description;
 
     private LocalDate endDate;

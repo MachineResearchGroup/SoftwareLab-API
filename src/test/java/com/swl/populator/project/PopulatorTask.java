@@ -1,14 +1,17 @@
 package com.swl.populator.project;
 
+import com.swl.models.people.Collaborator;
 import com.swl.models.project.Columns;
 import com.swl.models.project.History;
 import com.swl.models.project.Task;
 import com.swl.populator.config.PopulatorConfig;
 import com.swl.populator.util.CSVToArrayUtil;
 import com.swl.populator.util.FakerUtil;
+import com.swl.repository.CollaboratorRepository;
 import com.swl.repository.HistoryRepository;
 import com.swl.repository.TaskRepository;
 import lombok.AllArgsConstructor;
+import org.assertj.core.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -55,11 +59,11 @@ public class PopulatorTask {
     }
 
 
-    public Task saveFromHistory(Columns columns, History history, PopulatorConfig config) {
+    public Task saveFromHistory(Columns columns, Collaborator collaborator, History history, PopulatorConfig config) {
         Task task = create();
         task.setHistory(history);
         task.setColumn(columns);
-
+        task.setCollaborators(new ArrayList(Collections.singletonList(collaborator)));
         task = taskRepository.save(task);
 
         // Save Labels
@@ -73,10 +77,10 @@ public class PopulatorTask {
     }
 
 
-    public Task save(Columns columns, PopulatorConfig config) {
+    public Task save(Columns columns, Collaborator collaborator, PopulatorConfig config) {
         Task task = create();
         task.setColumn(columns);
-
+        task.setCollaborators(new ArrayList(Collections.singletonList(collaborator)));
         task = taskRepository.save(task);
 
         // Save Labels

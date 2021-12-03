@@ -54,7 +54,7 @@ public class PopulatorProject {
 
     private Project create() {
         return Project.builder()
-                .name(FakerUtil.getInstance().faker.dragonBall().character())
+                .name(FakerUtil.getInstance().faker.app().name())
                 .description(FakerUtil.getInstance().faker.shakespeare().hamletQuote())
                 .repository(FakerUtil.getInstance().faker.internet().url())
                 .build();
@@ -77,9 +77,11 @@ public class PopulatorProject {
         });
 
         // Save Boards
+        Optional<List<Collaborator>> collaborators = collaboratorRepository.findAllCollaboratorByTeamId(team.getId());
         finalProject.setBoards(new ArrayList<>());
+        List<Collaborator> finalCollaborators = collaborators.get();
         IntStream.range(0, config.getNumberBoardsByProject()).forEach(e -> {
-            finalProject.getBoards().add(populatorBoard.save(finalProject, config));
+            finalProject.getBoards().add(populatorBoard.save(finalProject, finalCollaborators, config));
         });
 
         // Save Labels
@@ -96,11 +98,10 @@ public class PopulatorProject {
         });
 
         // Save Documents
-        Optional<List<Collaborator>> collaborators = collaboratorRepository.findAllCollaboratorByTeamId(team.getId());
         finalProject.setDocuments(new ArrayList<>());
         IntStream.range(0, config.getNumberDocumentsByProject()).forEach(e -> {
-            finalProject.getDocuments().add(populatorDocument.save(finalProject, collaborators.get()
-                    .get(FakerUtil.getInstance().faker.number().numberBetween(0, collaborators.get().size() - 1))));
+            finalProject.getDocuments().add(populatorDocument.save(finalProject, finalCollaborators
+                    .get(FakerUtil.getInstance().faker.number().numberBetween(0, finalCollaborators.size() - 1))));
         });
 
         // Save Events

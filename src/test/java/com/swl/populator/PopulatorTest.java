@@ -50,26 +50,26 @@ public class PopulatorTest {
     @Test
     public void run() {
         PopulatorConfig populatorConfig = PopulatorConfig.builder()
-                .numberOrganizations(5)
-                .rangeNumberTeams(new int[]{2, 5})
-                .rangeNumberCollaboratorsByTeam(new int[]{2, 3})
-                .rangeNumberProjectsByTeam(new int[]{2, 2})
-                .rangeNumberEpicsByProject(new int[]{2, 2})
-                .rangeNumberSprintsByEpic(new int[]{2, 5})
-                .rangeNumberLabels(new int[]{2, 2})
-                .rangeNumberRedactionsByProject(new int[]{2, 5})
-                .rangeNumberRequirementsByRedaction(new int[]{2, 5})
-                .rangeNumberBoardsByProject(new int[]{1, 2})
-                .rangeNumberColumnsByBoard(new int[]{4, 8})
-                .rangeNumberHistoriesByColumn(new int[]{1, 6})
-                .rangeNumberTasksByColumn(new int[]{1, 2})
-                .rangeNumberTasksByHistory(new int[]{1, 4})
-                .rangeNumberDocumentsByProject(new int[]{2, 5})
-                .rangeNumberEventsByProject(new int[]{2, 5})
+                .numberOrganizations(100)
+                .rangeNumberTeams(new int[]{5, 10})
+                .rangeNumberCollaboratorsByTeam(new int[]{3, 6})
+                .rangeNumberProjectsByTeam(new int[]{1, 5})
+                .rangeNumberEpicsByProject(new int[]{1, 4})
+                .rangeNumberSprintsByEpic(new int[]{1, 5})
+                .rangeNumberLabels(new int[]{1, 1})
+                .rangeNumberRedactionsByProject(new int[]{1, 3})
+                .rangeNumberRequirementsByRedaction(new int[]{2, 10})
+                .rangeNumberBoardsByProject(new int[]{1, 4})
+                .rangeNumberColumnsByBoard(new int[]{2, 8})
+                .rangeNumberHistoriesByColumn(new int[]{1, 5})
+                .rangeNumberTasksByColumn(new int[]{1, 10})
+                .rangeNumberTasksByHistory(new int[]{1, 5})
+                .rangeNumberDocumentsByProject(new int[]{1, 15})
+                .rangeNumberEventsByProject(new int[]{1, 1})
                 .build();
 
-//        populatorRequirement.saveAll();
-//        populatorOrganization.save(populatorConfig);
+        populatorRequirement.saveAll();
+        populatorOrganization.save(populatorConfig);
     }
 
 }

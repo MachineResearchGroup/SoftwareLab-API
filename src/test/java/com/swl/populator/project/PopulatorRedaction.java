@@ -61,7 +61,7 @@ public class PopulatorRedaction {
 
         //Save Requirements
         IntStream.range(0, config.getNumberRequirementsByRedaction()).forEach(f -> {
-            int posRequirement = FakerUtil.getInstance().faker.number().numberBetween(1, 2409);
+            int posRequirement = FakerUtil.getInstance().faker.number().numberBetween(1, 2371);
             Optional<Requirement> requirement = requirementRepository.findById(posRequirement);
             redaction.setRequirements(new ArrayList<>(Collections.singletonList(requirement.get())));
 

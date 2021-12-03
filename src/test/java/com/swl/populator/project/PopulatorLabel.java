@@ -20,7 +20,7 @@ public class PopulatorLabel {
         return Label.builder()
                 .name(FakerUtil.getInstance().faker.funnyName().name())
                 .description(FakerUtil.getInstance().faker.shakespeare().asYouLikeItQuote())
-                .color(FakerUtil.getInstance().faker.color().name())
+                .color(FakerUtil.getInstance().faker.color().hex())
                 .build();
     }
 

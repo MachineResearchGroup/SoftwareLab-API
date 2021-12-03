@@ -38,7 +38,7 @@ public class User {
     @Lob
     private byte[] profileImage;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "user_phone")
     private List<String> phones;
 

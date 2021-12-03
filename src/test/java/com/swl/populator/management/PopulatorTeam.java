@@ -32,7 +32,7 @@ public class PopulatorTeam {
 
     public Team create() {
         return Team.builder()
-                .name(FakerUtil.getInstance().faker.lordOfTheRings().location())
+                .name(FakerUtil.getInstance().faker.team().name())
                 .build();
     }
 

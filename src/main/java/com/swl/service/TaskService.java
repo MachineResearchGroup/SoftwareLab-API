@@ -49,9 +49,6 @@ public class TaskService {
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private void verifyTask(TaskRequest taskRequest) {
-        ModelUtil modelUtil = ModelUtil.getInstance();
-        Task task = new Task();
-
         try {
             LocalDate formattedData = LocalDate.parse(taskRequest.getEndDate(), formatter);
         } catch (Exception parseException) {
@@ -59,13 +56,6 @@ public class TaskService {
                     .key("endDate")
                     .build());
         }
-
-//        CopyUtil.copyProperties(taskRequest, task);
-//        ErrorResponse error = modelUtil.validate(task);
-//
-//        if (!Objects.isNull(error)) {
-//            throw new InvalidFieldException(error);
-//        }
     }
 
 

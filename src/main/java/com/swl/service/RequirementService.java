@@ -29,6 +29,9 @@ public class RequirementService {
     @Autowired
     private final RequirementRepository repository;
 
+    @Autowired
+    private final TriggerIAService  triggerIAService;
+
 
     public Requirement registerRequirement(RequirementRequest requirementRequest) {
         Optional<Project> project = projectRepository.findById(requirementRequest.getIdProject());
@@ -43,6 +46,9 @@ public class RequirementService {
 
             project.get().getRequirements().add(requirement);
             projectRepository.save(project.get());
+
+            // Trigger IA
+            triggerIAService.classifyRequirement(requirement);
 
             return requirement;
         } else {

@@ -32,7 +32,7 @@ public class PopulatorEpic {
         LocalDate initDate = getDate();
 
         return Epic.builder()
-                .name(FakerUtil.getInstance().faker.lordOfTheRings().character())
+                .name(FakerUtil.getInstance().faker.pokemon().name())
                 .description(FakerUtil.getInstance().faker.shakespeare().kingRichardIIIQuote())
                 .initDate(initDate)
                 .endDate(getEndDate(initDate))

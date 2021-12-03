@@ -38,7 +38,7 @@ public class PopulatorOrganization {
     public Organization create() {
         return Organization.builder()
                 .name(FakerUtil.getInstance().faker.company().name())
-                .cnpj(getCnpj())
+                .cnpj(CNPJGeneratorUtil.generateCNPJ())
                 .address(Address.builder()
                         .street(FakerUtil.getInstance().faker.address().streetName())
                         .number(FakerUtil.getInstance().faker.address().streetAddressNumber())
@@ -47,15 +47,6 @@ public class PopulatorOrganization {
                         .complement(FakerUtil.getInstance().faker.address().streetAddressNumber())
                         .build())
                 .build();
-    }
-
-
-    private String getCnpj() {
-        String cnpj = CNPJGeneratorUtil.generate();
-        while (organizationRepository.findOrganizationByCnpj(cnpj).isPresent()) {
-            cnpj = CNPJGeneratorUtil.generate();
-        }
-        return cnpj;
     }
 
 

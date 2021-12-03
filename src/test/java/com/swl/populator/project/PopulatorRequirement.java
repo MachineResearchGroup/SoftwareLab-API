@@ -23,9 +23,14 @@ public class PopulatorRequirement {
         List<List<String>> requirements = CSVToArrayUtil.csvToArrayList("src/test/resources/Rainbow_Dataset.csv");
         requirements.remove(0);
 
-        return requirements.stream().map(r -> Requirement.builder()
+
+        return requirements.stream().map(r -> r.get(2).equals("F") ? Requirement.builder()
                 .description(r.get(1))
                 .category(r.get(2))
+                .build() : Requirement.builder()
+                .description(r.get(1))
+                .category("NF")
+                .subcategory(r.get(2))
                 .build()
         ).collect(Collectors.toList());
 

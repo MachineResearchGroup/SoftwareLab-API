@@ -39,13 +39,16 @@ public class RequirementServiceTest {
     @Mock
     private RequirementRepository repository;
 
+    @Mock
+    private TriggerIAService triggerIAService;
+
     private RequirementService service;
 
     AtomicBoolean thrownException = new AtomicBoolean(false);
 
     @BeforeEach
     public void initUseCase() {
-        service = new RequirementService(projectRepository, repository);
+        service = new RequirementService(projectRepository, repository, triggerIAService);
     }
 
 

@@ -62,6 +62,7 @@ public class PopulatorSprint {
 
     public Sprint save(Epic epic) {
         Sprint sprint = create();
+        sprint.setName(epic.getProject().getName() + " Sprint " + FakerUtil.getInstance().faker.number().digit());
         sprint.setEpic(epic);
 
         return sprintRepository.save(sprint);
