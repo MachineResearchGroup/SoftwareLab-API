@@ -33,16 +33,12 @@ public class RequirementService {
     private final RequirementRepository repository;
 
 
-    public void verifyRequirement(RequirementRequest requirementRequest) {
+    private void verifyRequirement(RequirementRequest requirementRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
-        Redaction redaction = new Redaction();
+        Requirement requirement = new Requirement();
 
-        if (projectRepository.findById(requirementRequest.getIdProject()).isEmpty()) {
-            throw new NotFoundException(Project.class);
-        }
-
-        modelUtil.map(requirementRequest, redaction);
-        ErrorResponse error = modelUtil.validate(redaction);
+        modelUtil.map(requirementRequest, requirement);
+        ErrorResponse error = modelUtil.validate(requirement);
 
         if (!Objects.isNull(error)) {
             throw new InvalidFieldException(error);
@@ -52,6 +48,7 @@ public class RequirementService {
 
     public Requirement registerRequirement(RequirementRequest requirementRequest) {
         ModelUtil modelUtil = ModelUtil.getInstance();
+        verifyRequirement(requirementRequest);
         Optional<Project> project = projectRepository.findById(requirementRequest.getIdProject());
 
         if (project.isPresent()) {
@@ -74,7 +71,14 @@ public class RequirementService {
 
     public Requirement editRequirement(Integer idReq, RequirementRequest requirementRequest) {
         Requirement redactionAux = getRequirement(idReq);
-        CopyUtil.copyProperties(requirementRequest, redactionAux);
+        verifyRequirement(requirementRequest);
+
+        Optional<Project> project = projectRepository.findById(requirementRequest.getIdProject());
+        if (project.isPresent()) {
+            CopyUtil.copyProperties(requirementRequest, redactionAux);
+        }else{
+            throw new NotFoundException(Project.class);
+        }
         return repository.save(redactionAux);
     }
 

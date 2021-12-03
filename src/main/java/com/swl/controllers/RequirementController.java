@@ -32,7 +32,6 @@ public class RequirementController {
     @Secured({"ROLE_DEV", "ROLE_PO"})
     public ResponseEntity<?> registerRequirement(@RequestBody RequirementRequest requirementRequest) {
 
-        service.verifyRequirement(requirementRequest);
         Requirement requirement = service.registerRequirement(requirementRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.REGISTERED, requirement));
 
@@ -45,7 +44,6 @@ public class RequirementController {
     @Secured({"ROLE_DEV", "ROLE_PO"})
     public ResponseEntity<?> editRequirement(@PathVariable("idRequirement") Integer idRequirement, @RequestBody RequirementRequest requirementRequest) {
 
-        service.verifyRequirement(requirementRequest);
         Requirement editRequirement = service.editRequirement(idRequirement, requirementRequest);
         return ResponseEntity.ok(new MessageResponse(MessageEnum.EDITED, editRequirement));
 
