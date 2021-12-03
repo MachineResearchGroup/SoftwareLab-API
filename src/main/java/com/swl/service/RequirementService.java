@@ -1,14 +1,17 @@
 package com.swl.service;
 
+import com.swl.exceptions.business.InvalidFieldException;
 import com.swl.exceptions.business.NotFoundException;
 import com.swl.models.management.Team;
 import com.swl.models.project.Board;
 import com.swl.models.project.Project;
 import com.swl.models.project.Requirement;
 import com.swl.payload.request.RequirementRequest;
+import com.swl.payload.response.ErrorResponse;
 import com.swl.repository.ProjectRepository;
 import com.swl.repository.RequirementRepository;
 import com.swl.util.CopyUtil;
+import com.swl.util.ModelUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,7 +36,22 @@ public class RequirementService {
     private final TriggerIAService  triggerIAService;
 
 
+    private void verifyRequirement(RequirementRequest requirementRequest) {
+        ModelUtil modelUtil = ModelUtil.getInstance();
+        Requirement requirement = new Requirement();
+
+        modelUtil.map(requirementRequest, requirement);
+        ErrorResponse error = modelUtil.validate(requirement);
+
+        if (!Objects.isNull(error)) {
+            throw new InvalidFieldException(error);
+        }
+    }
+
+
     public Requirement registerRequirement(RequirementRequest requirementRequest) {
+        verifyRequirement(requirementRequest);
+
         Optional<Project> project = projectRepository.findById(requirementRequest.getIdProject());
 
         if (project.isPresent()) {
@@ -59,14 +77,15 @@ public class RequirementService {
 
     public Requirement editRequirement(Integer idReq, RequirementRequest requirementRequest) {
         Requirement redactionAux = getRequirement(idReq);
-        Optional<Project> project = projectRepository.findById(requirementRequest.getIdProject());
+        verifyRequirement(requirementRequest);
 
+        Optional<Project> project = projectRepository.findById(requirementRequest.getIdProject());
         if (project.isPresent()) {
             CopyUtil.copyProperties(requirementRequest, redactionAux);
-            return repository.save(redactionAux);
-        } else {
+        }else{
             throw new NotFoundException(Project.class);
         }
+        return repository.save(redactionAux);
     }
 
 
