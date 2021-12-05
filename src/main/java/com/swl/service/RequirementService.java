@@ -66,9 +66,9 @@ public class RequirementService {
             projectRepository.save(project.get());
 
             // Trigger IA
-            //triggerIAService.classifyRequirement(requirement);
+            triggerIAService.classifyRequirement(requirement);
 
-            return requirement;
+            return repository.save(requirement);
         } else {
             throw new NotFoundException(Project.class);
         }
